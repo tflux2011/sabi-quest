@@ -1,0 +1,143 @@
+/* ChibiAvatar Animations and Styles */
+
+/* Gentle floating/breathing animation */
+@keyframes chibi-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Eye sparkle twinkle */
+@keyframes sparkle-twinkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 0.5;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  75% {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+}
+
+/* Blink animation */
+@keyframes blink {
+  0%, 94%, 100% {
+    transform: scaleY(1);
+  }
+  96%, 98% {
+    transform: scaleY(0.05);
+  }
+}
+
+/* Thinking bubble float */
+@keyframes think-float {
+  0%, 100% {
+    opacity: 0.7;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.1);
+  }
+}
+
+/* Hair sway for afro */
+@keyframes hair-sway {
+  0%, 100% {
+    transform: scaleX(1) rotate(0deg);
+  }
+  25% {
+    transform: scaleX(1.01) rotate(0.5deg);
+  }
+  75% {
+    transform: scaleX(1.01) rotate(-0.5deg);
+  }
+}
+
+/* Gentle head tilt */
+@keyframes head-tilt {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(1deg);
+  }
+  70% {
+    transform: rotate(-1deg);
+  }
+}
+
+/* Apply animations when animated class is present */
+.chibi-avatar.chibi-animated .chibi-body {
+  animation: chibi-float 2.5s ease-in-out infinite, head-tilt 6s ease-in-out infinite;
+  transform-origin: 50px 100px;
+}
+
+.chibi-avatar.chibi-animated .eyes {
+  animation: blink 3.5s ease-in-out infinite;
+  transform-origin: 50px 50px;
+}
+
+/* Sparkle animation on eye highlights */
+.chibi-avatar.chibi-animated .sparkle {
+  animation: sparkle-twinkle 2s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+.chibi-avatar.chibi-animated .sparkle:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.chibi-avatar.chibi-animated .think-bubble {
+  animation: think-float 1.5s ease-in-out infinite;
+}
+
+.chibi-avatar.chibi-animated .think-bubble:nth-of-type(2) {
+  animation-delay: 0.2s;
+}
+
+.chibi-avatar.chibi-animated .think-bubble:nth-of-type(3) {
+  animation-delay: 0.4s;
+}
+
+/* Afro hair subtle movement */
+.chibi-avatar.chibi-animated .afro-texture {
+  animation: hair-sway 3s ease-in-out infinite;
+  transform-origin: 50px 30px;
+}
+
+/* Hover effects */
+.chibi-avatar:hover .chibi-body {
+  animation-duration: 1.5s, 4s;
+}
+
+.chibi-avatar {
+  cursor: pointer;
+  transition: filter 0.3s ease, transform 0.2s ease;
+}
+
+.chibi-avatar:hover {
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.2)) brightness(1.05);
+  transform: scale(1.02);
+}
+
+/* Make the avatar feel more alive with subtle transforms */
+.chibi-avatar:active {
+  transform: scale(0.98);
+}
+
+/* Blush glow on hover */
+.chibi-avatar:hover ellipse[fill="rgba(255, 150, 150, 0.2)"] {
+  fill: rgba(255, 130, 130, 0.35);
+}

@@ -1,0 +1,334 @@
+/* Journey Map Styles */
+
+.journey-map-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+}
+
+.journey-map-container {
+  background: linear-gradient(145deg, #1a2a1a 0%, #0d1f0d 100%);
+  border-radius: var(--radius-2xl);
+  padding: var(--spacing-xl);
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 2px solid rgba(0, 200, 150, 0.3);
+  box-shadow: 
+    0 0 60px rgba(0, 200, 150, 0.2),
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Header */
+.journey-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.journey-header h1 {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  text-align: center;
+}
+
+.sparkle-icon {
+  color: #FFD700;
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(10deg); opacity: 0.8; }
+}
+
+/* Map Area */
+.journey-map-area {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.2;
+  background: linear-gradient(180deg, 
+    rgba(0, 100, 50, 0.1) 0%, 
+    rgba(0, 50, 25, 0.2) 100%
+  );
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid rgba(0, 200, 150, 0.2);
+}
+
+.nigeria-map-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.nigeria-outline {
+  opacity: 0.5;
+}
+
+/* State Dots */
+.state-dot {
+  fill: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.state-dot.completed {
+  fill: #FFD700;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+.state-dot.next {
+  fill: #00C896;
+  filter: drop-shadow(0 0 10px rgba(0, 200, 150, 0.8));
+}
+
+/* Journey Path */
+.journey-path {
+  fill: none;
+  stroke: #FFD700;
+  stroke-width: 0.8;
+  stroke-dasharray: 4, 2;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+}
+
+.footstep {
+  font-size: 3px;
+  opacity: 0.4;
+}
+
+/* State Labels */
+.state-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+}
+
+.state-marker {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.state-marker.completed {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  border: 2px solid #fff;
+}
+
+.state-marker.next {
+  background: linear-gradient(135deg, #00C896, #00a67d);
+  border: 2px solid #fff;
+  color: white;
+}
+
+.state-name {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.state-subtitle {
+  font-size: 0.65rem;
+  color: #00C896;
+  font-weight: 600;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Traveling Avatar */
+.traveling-avatar {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+}
+
+.avatar-placeholder {
+  font-size: 2.5rem;
+}
+
+/* Rewards Section */
+.rewards-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.rewards-section h2 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 var(--spacing-md);
+  text-align: center;
+}
+
+.rewards-grid {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.reward-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 100px;
+}
+
+.reward-card.stars {
+  border-color: rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.reward-card.xp {
+  border-color: rgba(0, 200, 150, 0.3);
+  background: rgba(0, 200, 150, 0.1);
+}
+
+.reward-card.xp .reward-icon {
+  color: #00C896;
+}
+
+.reward-card.badges {
+  border-color: rgba(147, 112, 219, 0.3);
+  background: rgba(147, 112, 219, 0.1);
+}
+
+.reward-card.badges .reward-icon {
+  color: #9370DB;
+}
+
+.reward-icon {
+  display: flex;
+  gap: 2px;
+}
+
+.reward-value {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: white;
+}
+
+.reward-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+/* Action Buttons */
+.journey-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.journey-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.journey-btn.primary {
+  background: linear-gradient(135deg, #00C896, #00a67d);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 200, 150, 0.4);
+}
+
+.journey-btn.primary:hover {
+  box-shadow: 0 6px 20px rgba(0, 200, 150, 0.5);
+}
+
+.journey-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.journey-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .journey-map-container {
+    padding: var(--spacing-md);
+    margin: var(--spacing-sm);
+  }
+
+  .journey-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .rewards-grid {
+    gap: var(--spacing-sm);
+  }
+
+  .reward-card {
+    min-width: 80px;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .traveling-avatar {
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+
+  .state-marker {
+    width: 28px;
+    height: 28px;
+  }
+
+  .state-marker svg {
+    width: 14px;
+    height: 14px;
+  }
+}

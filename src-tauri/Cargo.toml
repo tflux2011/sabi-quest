@@ -1,0 +1,35 @@
+[package]
+name = "project-nigeria"
+version = "0.1.0"
+description = "An offline-first educational RPG for Nigerian students"
+authors = ["Project Nigeria Team"]
+license = "MIT"
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.5.3", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.9.5", features = ["protocol-asset"] }
+tauri-plugin-log = "2"
+
+# SQLite database - bundled means no external dependencies needed (offline-first)
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# For async database operations and thread-safe state
+once_cell = "1.19"
+parking_lot = "0.12"
+
+# For proper error handling
+thiserror = "1.0"
