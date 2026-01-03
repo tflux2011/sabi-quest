@@ -4,6 +4,8 @@
 use super::{DatabaseError, DatabaseState, models::*, schema, seed_curriculum};
 use serde::{Serialize, Deserialize};
 use tauri::State as TauriState;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 
 /// Initialize the database and create tables
 /// This should be called once when the app starts
@@ -449,6 +451,7 @@ pub async fn get_module_content(
     
     // Get questions for each level
     let mut levels_with_questions = Vec::new();
+    let mut rng = thread_rng();
     
     for level in levels {
         let mut question_stmt = conn.prepare(
@@ -456,7 +459,7 @@ pub async fn get_module_content(
              FROM questions WHERE level_id = ?1 ORDER BY order_index"
         ).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
         
-        let questions: Vec<Question> = question_stmt.query_map([&level.id], |row| {
+        let mut questions: Vec<Question> = question_stmt.query_map([&level.id], |row| {
             let options_json: Option<String> = row.get(4)?;
             let options: Option<Vec<QuestionOption>> = options_json.and_then(|json| {
                 serde_json::from_str(&json).ok()
@@ -478,6 +481,16 @@ pub async fn get_module_content(
         }).map_err(|e| DatabaseError::QueryError(e.to_string()))?
         .collect::<Result<Vec<_>, _>>()
         .map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+        
+        // Randomize question order for each session
+        questions.shuffle(&mut rng);
+        
+        // Also randomize the order of multiple choice options (but preserve correct_answer mapping)
+        for question in &mut questions {
+            if let Some(ref mut options) = question.options {
+                options.shuffle(&mut rng);
+            }
+        }
         
         levels_with_questions.push(LevelWithQuestions { level, questions });
     }

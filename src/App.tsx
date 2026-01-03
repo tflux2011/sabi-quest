@@ -29,7 +29,6 @@ import {
   Music,
   MessageCircle,
   Clock,
-  Hand,
   Zap,
   Volume2,
   VolumeX,
@@ -1657,12 +1656,12 @@ function App() {
                 id: nextState.state.id,
                 name: nextState.state.name,
                 region: nextState.state.region || 'Nigeria',
-                landmark_name: nextState.state.landmark_name
+                landmark_name: nextState.state.landmark_name || undefined
               } : null,
               rewards: {
                 stars: maxStars,
                 xp: totalXpEarned,
-                items: levelResult?.item_unlocked ? [levelResult.item_unlocked] : [],
+                items: levelResult?.unlocked_item ? [levelResult.unlocked_item] : [],
                 badges: []
               }
             });
@@ -1792,15 +1791,20 @@ function App() {
       await loadCodexEntries(selectedCodexCategory);
       
       // Update the selected entry's progress to reflect the read status
-      setSelectedCodexEntry(prev => prev ? {
-        ...prev,
-        progress: {
-          ...prev.progress,
-          is_read: true,
-          is_unlocked: prev.progress?.is_unlocked ?? true,
-          is_bookmarked: prev.progress?.is_bookmarked ?? false
-        }
-      } : null);
+      if (selectedCodexEntry && selectedCodexEntry.progress) {
+        setSelectedCodexEntry({
+          ...selectedCodexEntry,
+          progress: {
+            entry_id: selectedCodexEntry.progress.entry_id,
+            is_read: true,
+            is_unlocked: selectedCodexEntry.progress.is_unlocked,
+            is_bookmarked: selectedCodexEntry.progress.is_bookmarked,
+            unlocked_at: selectedCodexEntry.progress.unlocked_at,
+            first_read_at: selectedCodexEntry.progress.first_read_at || new Date().toISOString(),
+            read_count: (selectedCodexEntry.progress.read_count || 0) + 1
+          }
+        });
+      }
     } catch (err) {
       console.error('Error marking entry as read:', err);
     }
@@ -1936,10 +1940,9 @@ function App() {
               {userAvatar ? (
                 <ChibiAvatar
                   skinTone={userAvatar.skin_tone}
-                  hairStyle={userAvatar.hair_style}
-                  hairColor={userAvatar.hair_color}
+                  hairStyle={userAvatar.hairstyle}
                   outfit={userAvatar.outfit}
-                  accessories={userAvatar.accessories}
+                  accessory={userAvatar.accessory || undefined}
                   size={48}
                 />
               ) : (
@@ -3816,10 +3819,9 @@ function App() {
         rewards={journeyData?.rewards || { stars: 0, xp: 0, items: [], badges: [] }}
         avatar={userAvatar ? {
           skin_tone: userAvatar.skin_tone,
-          hair_style: userAvatar.hair_style,
-          hair_color: userAvatar.hair_color,
+          hairstyle: userAvatar.hairstyle,
           outfit: userAvatar.outfit,
-          accessories: userAvatar.accessories
+          accessory: userAvatar.accessory
         } : null}
         onContinue={handleJourneyContinue}
         onReturnHome={handleJourneyReturnHome}

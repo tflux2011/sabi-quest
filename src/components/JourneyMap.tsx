@@ -23,10 +23,9 @@ interface JourneyMapProps {
   };
   avatar: {
     skin_tone: string;
-    hair_style: string;
-    hair_color: string;
+    hairstyle: string;
     outfit: string;
-    accessories: string[];
+    accessory: string | null;
   } | null;
   onContinue: () => void;
   onReturnHome: () => void;
@@ -214,10 +213,9 @@ const JourneyMap: React.FC<JourneyMapProps> = ({
                 {avatar ? (
                   <ChibiAvatar
                     skinTone={avatar.skin_tone}
-                    hairStyle={avatar.hair_style}
-                    hairColor={avatar.hair_color}
+                    hairStyle={avatar.hairstyle}
                     outfit={avatar.outfit}
-                    accessories={avatar.accessories}
+                    accessory={avatar.accessory || undefined}
                     size={60}
                   />
                 ) : (

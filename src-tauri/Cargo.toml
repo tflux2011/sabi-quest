@@ -27,6 +27,9 @@ tauri-plugin-log = "2"
 # SQLite database - bundled means no external dependencies needed (offline-first)
 rusqlite = { version = "0.32", features = ["bundled"] }
 
+# For question randomization
+rand = "0.8"
+
 # For async database operations and thread-safe state
 once_cell = "1.19"
 parking_lot = "0.12"

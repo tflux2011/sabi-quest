@@ -4,7 +4,7 @@
 use rusqlite::Connection;
 use super::DatabaseError;
 
-/// Seeds the database with comprehensive curriculum for Abuja and Lagos
+/// Seeds the database with comprehensive curriculum for all Nigerian states
 pub fn seed_curriculum(conn: &Connection) -> Result<(), DatabaseError> {
     // Seed states FIRST (required by user_progress foreign key)
     seed_states(conn)?;
@@ -15,11 +15,21 @@ pub fn seed_curriculum(conn: &Connection) -> Result<(), DatabaseError> {
     // Seed items that can be unlocked
     seed_items(conn)?;
     
-    // Seed Abuja modules (Heritage Zone)
+    // Seed Abuja modules (Heritage Zone - Tutorial)
     seed_abuja_modules(conn)?;
     
     // Seed Lagos modules (Mind Zone)
     seed_lagos_modules(conn)?;
+    
+    // Seed additional state modules
+    seed_ogun_modules(conn)?;
+    seed_oyo_modules(conn)?;
+    seed_osun_modules(conn)?;
+    seed_rivers_modules(conn)?;
+    seed_crossriver_modules(conn)?;
+    seed_sokoto_modules(conn)?;
+    seed_borno_modules(conn)?;
+    seed_taraba_modules(conn)?;
     
     // Seed The Sabi Codex encyclopedia entries
     seed_encyclopedia(conn)?;
@@ -30,7 +40,7 @@ pub fn seed_curriculum(conn: &Connection) -> Result<(), DatabaseError> {
     seed_artifacts(conn)?;
     seed_quests(conn)?;
     
-    log::info!("Curriculum seeded successfully with Abuja and Lagos modules");
+    log::info!("Curriculum seeded successfully with all state modules");
     Ok(())
 }
 
@@ -77,7 +87,101 @@ fn seed_states(conn: &Connection) -> Result<(), DatabaseError> {
              'Port Harcourt was named after Lewis Harcourt, a British Colonial Secretary, and is called the Garden City of Nigeria!'),
             ('CRS', 'Cross River', 'South South', 'spirit', 6, 'Obudu Mountain Resort', '/assets/images/crossriver-landmark.png',
              'Cross River State - The People''s Paradise, home to Africa''s oldest rainforest and the famous Calabar Carnival.',
-             'Cross River contains the last remaining virgin tropical rainforest in Nigeria and hosts Africa''s biggest street party!');
+             'Cross River contains the last remaining virgin tropical rainforest in Nigeria and hosts Africa''s biggest street party!'),
+            
+            -- =====================================================
+            -- REMAINING 26 STATES
+            -- =====================================================
+            
+            -- SOUTH EAST ZONE
+            ('ABI', 'Abia', 'South East', 'spirit', 5, 'Ariaria Market', '/assets/images/abia-landmark.png',
+             'Abia State - God''s Own State, known for its entrepreneurial spirit and the famous Aba market.',
+             'Aba in Abia State is called the "Japan of Africa" because its artisans can replicate almost any product!'),
+            ('ANA', 'Anambra', 'South East', 'mind', 5, 'Ogbunike Caves', '/assets/images/anambra-landmark.png',
+             'Anambra State - Light of the Nation, home to Onitsha, one of Africa''s largest markets.',
+             'Onitsha Main Market is the largest market in Africa by geographical size and number of traders!'),
+            ('EBO', 'Ebonyi', 'South East', 'spirit', 6, 'Salt Lake Okposi', '/assets/images/ebonyi-landmark.png',
+             'Ebonyi State - The Salt of the Nation, known for its natural salt lakes and rice production.',
+             'Ebonyi has natural salt lakes that have been mined for centuries, giving the state its nickname!'),
+            ('ENU', 'Enugu', 'South East', 'heritage', 5, 'Enugu Coal Mine', '/assets/images/enugu-landmark.png',
+             'Enugu State - Coal City State, the former capital of Eastern Nigeria and home to Nigeria''s coal industry.',
+             'Enugu means "hilltop" in Igbo. The city grew around coal mining and was once the most industrialized city in Nigeria!'),
+            
+            -- SOUTH WEST ZONE (Additional)
+            ('EKI', 'Ekiti', 'South West', 'heritage', 5, 'Ikogosi Warm Springs', '/assets/images/ekiti-landmark.png',
+             'Ekiti State - Land of Honor, known for its highly educated population and unique warm springs.',
+             'Ikogosi has a natural wonder where warm and cold springs meet and flow side by side without mixing!'),
+            ('OND', 'Ondo', 'South West', 'spirit', 5, 'Idanre Hills', '/assets/images/ondo-landmark.png',
+             'Ondo State - Sunshine State, home to cocoa farming and the ancient Idanre Kingdom.',
+             'Idanre Hills has 640 steps carved into ancient rock leading to a hilltop kingdom inhabited for over 800 years!'),
+            ('OSU', 'Osun', 'South West', 'spirit', 4, 'Osun-Osogbo Sacred Grove', '/assets/images/osun-landmark.png',
+             'Osun State - State of the Living Spring, home to the UNESCO World Heritage Osun-Osogbo Sacred Grove.',
+             'The Osun-Osogbo Grove is one of the last remaining primary forests in southern Nigeria and a UNESCO World Heritage Site!'),
+            
+            -- SOUTH SOUTH ZONE (Additional)
+            ('AKW', 'Akwa Ibom', 'South South', 'mind', 5, 'Ibom Plaza', '/assets/images/akwaibom-landmark.png',
+             'Akwa Ibom State - Land of Promise, known for its beautiful beaches and rich oil resources.',
+             'Akwa Ibom is the highest oil-producing state in Nigeria and has some of the most beautiful beaches in West Africa!'),
+            ('BAY', 'Bayelsa', 'South South', 'spirit', 6, 'Ox-Bow Lake', '/assets/images/bayelsa-landmark.png',
+             'Bayelsa State - Glory of All Lands, the heart of the Niger Delta with rich mangrove forests.',
+             'Bayelsa was created in 1996 and is the youngest state in the South South region!'),
+            ('DEL', 'Delta', 'South South', 'mind', 5, 'Lander Brothers Anchorage', '/assets/images/delta-landmark.png',
+             'Delta State - The Big Heart, home to diverse ethnic groups and major oil production.',
+             'Delta State has over 40 ethnic groups speaking different languages, one of the most diverse states in Nigeria!'),
+            
+            -- NORTH CENTRAL ZONE (Additional)
+            ('BEN', 'Benue', 'North Central', 'heritage', 4, 'River Benue', '/assets/images/benue-landmark.png',
+             'Benue State - Food Basket of the Nation, Nigeria''s leading producer of yams, cassava, and vegetables.',
+             'Benue produces more food than any other state in Nigeria and is called the "Food Basket of the Nation"!'),
+            ('KOG', 'Kogi', 'North Central', 'heritage', 4, 'Confluence of Niger and Benue', '/assets/images/kogi-landmark.png',
+             'Kogi State - The Confluence State, where Nigeria''s two largest rivers meet at Lokoja.',
+             'Lokoja in Kogi State is where the Rivers Niger and Benue meet - the only place in the world with this natural phenomenon!'),
+            ('KWA', 'Kwara', 'North Central', 'mind', 4, 'Owu Waterfalls', '/assets/images/kwara-landmark.png',
+             'Kwara State - State of Harmony, known for its cultural diversity and beautiful waterfalls.',
+             'Owu Waterfalls in Kwara is the highest waterfall in West Africa at 120 meters!'),
+            ('NAS', 'Nasarawa', 'North Central', 'heritage', 3, 'Farin Ruwa Falls', '/assets/images/nasarawa-landmark.png',
+             'Nasarawa State - Home of Solid Minerals, rich in gemstones and natural resources.',
+             'Nasarawa is called Nigeria''s "Jewel in the Savannah" due to its vast deposits of precious stones!'),
+            ('PLA', 'Plateau', 'North Central', 'heritage', 4, 'Shere Hills', '/assets/images/plateau-landmark.png',
+             'Plateau State - Home of Peace and Tourism, with a unique temperate climate in tropical Africa.',
+             'Jos in Plateau State has the coolest weather in Nigeria and was a popular colonial retreat due to its temperate climate!'),
+            
+            -- NORTH WEST ZONE (Additional)
+            ('JIG', 'Jigawa', 'North West', 'heritage', 5, 'Hadejia-Nguru Wetlands', '/assets/images/jigawa-landmark.png',
+             'Jigawa State - The New World, known for its wetlands and groundnut farming.',
+             'The Hadejia-Nguru Wetlands in Jigawa is one of Africa''s most important wetland ecosystems!'),
+            ('KAT', 'Katsina', 'North West', 'heritage', 5, 'Gobarau Minaret', '/assets/images/katsina-landmark.png',
+             'Katsina State - Home of Hospitality, ancient center of Islamic learning and culture.',
+             'Katsina was a major stop on trans-Saharan trade routes and had one of the oldest universities in Africa!'),
+            ('KEB', 'Kebbi', 'North West', 'heritage', 6, 'Argungu Fishing Festival', '/assets/images/kebbi-landmark.png',
+             'Kebbi State - Land of Equity, famous for the spectacular Argungu Fishing Festival.',
+             'The Argungu Fishing Festival is a 4-day event where thousands catch fish with their bare hands!'),
+            ('SOK', 'Sokoto', 'North West', 'heritage', 6, 'Sultan''s Palace', '/assets/images/sokoto-landmark.png',
+             'Sokoto State - Seat of the Caliphate, the spiritual center of Islam in Nigeria.',
+             'The Sultan of Sokoto is considered the spiritual leader of Nigerian Muslims, continuing a 200-year-old tradition!'),
+            ('ZAM', 'Zamfara', 'North West', 'heritage', 6, 'Gusau Dam', '/assets/images/zamfara-landmark.png',
+             'Zamfara State - Farming is Our Pride, known for cotton and groundnut production.',
+             'Zamfara was the first state in Nigeria to implement Sharia law in 2000!'),
+            
+            -- NORTH EAST ZONE
+            ('ADA', 'Adamawa', 'North East', 'spirit', 6, 'Mandara Mountains', '/assets/images/adamawa-landmark.png',
+             'Adamawa State - Land of Beauty, home to stunning mountain ranges and diverse cultures.',
+             'The Mandara Mountains in Adamawa are home to unique communities who have lived there for thousands of years!'),
+            ('BAU', 'Bauchi', 'North East', 'heritage', 5, 'Yankari Game Reserve', '/assets/images/bauchi-landmark.png',
+             'Bauchi State - Pearl of Tourism, home to Nigeria''s premier wildlife reserve.',
+             'Yankari Game Reserve has Africa''s largest herd of forest elephants and natural warm springs!'),
+            ('BOR', 'Borno', 'North East', 'heritage', 7, 'Shehu''s Palace', '/assets/images/borno-landmark.png',
+             'Borno State - Home of Peace, the ancient seat of the Kanem-Bornu Empire that lasted 1000 years.',
+             'The Kanem-Bornu Empire was one of the longest-lasting empires in African history, spanning over 1000 years!'),
+            ('GOM', 'Gombe', 'North East', 'heritage', 6, 'Tula Plateau', '/assets/images/gombe-landmark.png',
+             'Gombe State - Jewel in the Savannah, known for its unique Tangale culture.',
+             'Gombe is home to the Tula people who built their homes on mountain peaks for protection!'),
+            ('TAR', 'Taraba', 'North East', 'spirit', 6, 'Mambilla Plateau', '/assets/images/taraba-landmark.png',
+             'Taraba State - Nature''s Gift to the Nation, home to Nigeria''s highest plateau.',
+             'Mambilla Plateau at 1,800 meters is Nigeria''s highest point and has a climate similar to European countries!'),
+            ('YOB', 'Yobe', 'North East', 'heritage', 7, 'Dufuna Canoe Site', '/assets/images/yobe-landmark.png',
+             'Yobe State - Pride of the Sahel, where Africa''s oldest boat was discovered.',
+             'The Dufuna Canoe found in Yobe is over 8,000 years old - the oldest boat in Africa and third oldest in the world!');
     "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
     
     Ok(())
@@ -575,6 +679,1026 @@ fn seed_lagos_modules(conn: &Connection) -> Result<(), DatabaseError> {
              'a', 20,
              'In logic, OR returns TRUE if at least one value is TRUE. TRUE OR FALSE = TRUE.',
              'Only one needs to be true for OR to be true.',
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    // Seed additional state modules
+    seed_kano_modules(conn)?;
+    seed_edo_modules(conn)?;
+    seed_enugu_modules(conn)?;
+    seed_plateau_modules(conn)?;
+    seed_bauchi_modules(conn)?;
+    seed_anambra_modules(conn)?;
+    
+    Ok(())
+}
+
+// =====================================================
+// KANO STATE MODULES
+// =====================================================
+fn seed_kano_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- KANO MODULE 1: THE ANCIENT TRADE ROUTES (History/Commerce)
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('kan_history_001', 'KAN', 'History', 'The Ancient Trade Routes', 
+                'Discover the history of trans-Saharan trade that made Kano one of Africa''s greatest commercial cities!',
+                4, 550, 22, 'map');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('kan_history_001',
+                'Kano has been a trading center for over 1000 years! Merchants from across the Sahara brought salt, cloth, and books in exchange for gold, kola nuts, and leather.',
+                'The famous Kano Groundnut Pyramids were so large they appeared on Nigerian currency! At their peak, they contained millions of bags of groundnuts.',
+                'Welcome to ancient Kano! Walk the same paths that merchants from Morocco, Egypt, and Arabia traveled centuries ago. Learn about the goods they traded and the cultures that connected across the desert.',
+                'The Hausa city-states, including Kano, were established around 1000 CE. By the 1400s, Kano was one of the most important cities in the trans-Saharan trade network.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('kan_history_001_lvl1', 'kan_history_001', 'Merchants of the Sahara', 'medium', 1, 120, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('kan_h1_q1', 'kan_history_001_lvl1',
+             'What valuable item was brought FROM the Sahara to Kano for trade?',
+             'multiple_choice',
+             '[{"id":"a","text":"Gold"},{"id":"b","text":"Salt"},{"id":"c","text":"Kola nuts"},{"id":"d","text":"Groundnuts"}]',
+             'b', 20,
+             'Salt was extremely valuable and was mined in the Sahara Desert. It was traded southward for gold, kola nuts, and other goods.',
+             'This mineral is essential for preserving food and was rare in the savanna.',
+             1),
+            
+            ('kan_h1_q2', 'kan_history_001_lvl1',
+             'Kurmi Market in Kano is famous for being:',
+             'multiple_choice',
+             '[{"id":"a","text":"The newest market in Nigeria"},{"id":"b","text":"One of the oldest markets in West Africa"},{"id":"c","text":"Only for selling electronics"},{"id":"d","text":"A market that only opens once a year"}]',
+             'b', 20,
+             'Kurmi Market has been in continuous operation for over 500 years, making it one of the oldest and most historic markets in West Africa.',
+             'Think about the word "ancient" in connection to Kano.',
+             2),
+            
+            ('kan_h1_q3', 'kan_history_001_lvl1',
+             'The famous Kano dye pits are used to create which color?',
+             'multiple_choice',
+             '[{"id":"a","text":"Red"},{"id":"b","text":"Yellow"},{"id":"c","text":"Indigo (deep blue)"},{"id":"d","text":"Green"}]',
+             'c', 20,
+             'Kano is famous for its indigo dye pits, some over 500 years old. The deep blue fabric produced here is prized across Africa.',
+             'Think of a deep blue color - the same as blue jeans originally used.',
+             3),
+            
+            ('kan_h1_q4', 'kan_history_001_lvl1',
+             'What desert did traders cross to reach Kano from North Africa?',
+             'multiple_choice',
+             '[{"id":"a","text":"Gobi Desert"},{"id":"b","text":"Sahara Desert"},{"id":"c","text":"Kalahari Desert"},{"id":"d","text":"Arabian Desert"}]',
+             'b', 20,
+             'The Sahara Desert is the world''s largest hot desert and separates North Africa from sub-Saharan Africa. Trade routes crossed it for thousands of years.',
+             'It''s the largest hot desert in the world, located in Africa.',
+             4),
+            
+            ('kan_h1_q5', 'kan_history_001_lvl1',
+             'True or False: Camels were essential for trans-Saharan trade.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'Camels, known as "ships of the desert," could travel long distances without water and carry heavy loads, making trans-Saharan trade possible.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// EDO STATE MODULES
+// =====================================================
+fn seed_edo_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- EDO MODULE 1: THE BENIN BRONZES (Art/History)
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('edo_art_001', 'EDO', 'Art & History', 'The Benin Bronzes', 
+                'Explore the magnificent art of the Benin Kingdom - masterpieces that amazed the world!',
+                5, 600, 25, 'crown');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('edo_art_001',
+                'Benin bronze-casting technique is so sophisticated that European scientists initially refused to believe Africans made them! The lost-wax casting method used is extremely complex.',
+                'The Oba (King) of Benin commissioned artworks to record history. Some bronze plaques show Portuguese traders who arrived in the 15th century - one of the earliest visual records of European contact!',
+                'Welcome to the Royal Palace of Benin! Here, master craftsmen created bronze sculptures so beautiful that museums around the world still treasure them. Learn about this incredible artistic tradition.',
+                'The Benin Kingdom flourished from the 13th century until 1897. At its height, the capital Benin City was larger than London and had electric street lighting using palm oil lamps!');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('edo_art_001_lvl1', 'edo_art_001', 'Royal Craftsmen', 'medium', 1, 130, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('edo_a1_q1', 'edo_art_001_lvl1',
+             'The "Benin Bronzes" are famous artworks made primarily from:',
+             'multiple_choice',
+             '[{"id":"a","text":"Wood"},{"id":"b","text":"Brass and bronze"},{"id":"c","text":"Clay"},{"id":"d","text":"Gold"}]',
+             'b', 20,
+             'Despite being called "bronzes," most Benin artworks are actually made of brass (a mixture of copper and zinc). The term "bronze" was applied by Europeans.',
+             'The name gives a hint, though the actual metal is slightly different.',
+             1),
+            
+            ('edo_a1_q2', 'edo_art_001_lvl1',
+             'What is the title of the King of Benin?',
+             'multiple_choice',
+             '[{"id":"a","text":"Sultan"},{"id":"b","text":"Chief"},{"id":"c","text":"Oba"},{"id":"d","text":"Emir"}]',
+             'c', 20,
+             'The Oba is the traditional ruler of the Benin Kingdom. The title has been held continuously for over 700 years, making it one of Africa''s oldest monarchies.',
+             'This three-letter title is unique to Benin Kingdom.',
+             2),
+            
+            ('edo_a1_q3', 'edo_art_001_lvl1',
+             'The technique used to create Benin bronzes is called:',
+             'multiple_choice',
+             '[{"id":"a","text":"Pottery throwing"},{"id":"b","text":"Lost-wax casting"},{"id":"c","text":"Wood carving"},{"id":"d","text":"Stone cutting"}]',
+             'b', 25,
+             'Lost-wax casting involves creating a wax model, covering it in clay, then melting out the wax and pouring in molten metal. It produces incredibly detailed sculptures.',
+             'A wax model is used and then "lost" in the process.',
+             3),
+            
+            ('edo_a1_q4', 'edo_art_001_lvl1',
+             'True or False: Many Benin Bronzes are now in museums outside Nigeria.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'Thousands of Benin artworks were taken during the 1897 British invasion and are now in museums worldwide. Nigeria and these museums are discussing returning them.',
+             NULL,
+             4),
+            
+            ('edo_a1_q5', 'edo_art_001_lvl1',
+             'Benin City''s ancient walls (Iya) were once comparable in size to:',
+             'multiple_choice',
+             '[{"id":"a","text":"A football field"},{"id":"b","text":"The Great Wall of China"},{"id":"c","text":"A house"},{"id":"d","text":"A small village"}]',
+             'b', 25,
+             'The Benin Moat (Iya) consisted of over 16,000 km of walls and ditches - it was described as the world''s largest man-made earthwork before modern times!',
+             'Think VERY large - one of the biggest structures in history.',
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// ENUGU STATE MODULES
+// =====================================================
+fn seed_enugu_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- ENUGU MODULE 1: THE COAL CITY (Science/Industry)
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('enu_science_001', 'ENU', 'Science', 'The Coal City Story', 
+                'Discover how coal shaped Nigeria''s industrial history and learn about energy and resources!',
+                5, 500, 20, 'flame');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('enu_science_001',
+                'Coal was so important to colonial Nigeria that the railway was built specifically to transport it from Enugu to Port Harcourt. The whole city grew around coal mining!',
+                'Nigerian coal miners went on strike in 1949 at Iva Valley, and 21 miners were killed by police. This event sparked nationwide protests and helped speed up Nigerian independence!',
+                'Welcome to the Coal City! Enugu''s story is one of how a natural resource changed history. Learn about coal, energy, and how mining shaped a nation.',
+                'Coal was discovered in Enugu in 1909 by a British geological survey team. By the 1950s, Enugu was producing over 900,000 tons of coal per year.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('enu_science_001_lvl1', 'enu_science_001', 'Underground Treasures', 'medium', 1, 110, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('enu_s1_q1', 'enu_science_001_lvl1',
+             'Coal is formed from the remains of:',
+             'multiple_choice',
+             '[{"id":"a","text":"Dinosaurs"},{"id":"b","text":"Ancient plants and trees"},{"id":"c","text":"Sea creatures"},{"id":"d","text":"Volcanic rocks"}]',
+             'b', 20,
+             'Coal is a fossil fuel formed from ancient plants that died millions of years ago. Over time, heat and pressure transformed them into coal.',
+             'Think about what grows in forests and swamps.',
+             1),
+            
+            ('enu_s1_q2', 'enu_science_001_lvl1',
+             'Why is Enugu called "Coal City"?',
+             'multiple_choice',
+             '[{"id":"a","text":"It sells charcoal"},{"id":"b","text":"It was built around coal mines"},{"id":"c","text":"Buildings are black"},{"id":"d","text":"It''s very hot there"}]',
+             'b', 15,
+             'Enugu literally grew because of coal mining. The discovery of coal led to the building of railways, workers'' housing, and eventually a major city.',
+             'The city exists because of what was found underground.',
+             2),
+            
+            ('enu_s1_q3', 'enu_science_001_lvl1',
+             'Coal is used mainly as a source of:',
+             'multiple_choice',
+             '[{"id":"a","text":"Water"},{"id":"b","text":"Energy"},{"id":"c","text":"Food"},{"id":"d","text":"Medicine"}]',
+             'b', 15,
+             'Coal is burned to produce heat energy, which can power steam engines, generate electricity, and heat homes.',
+             'When something burns, what does it release?',
+             3),
+            
+            ('enu_s1_q4', 'enu_science_001_lvl1',
+             'The Iva Valley incident in 1949 involved:',
+             'multiple_choice',
+             '[{"id":"a","text":"A flood"},{"id":"b","text":"Coal miners'' strike"},{"id":"c","text":"A festival"},{"id":"d","text":"A football match"}]',
+             'b', 20,
+             'The Iva Valley Massacre occurred when coal miners striking for better conditions were shot by colonial police. This tragedy became a turning point toward independence.',
+             'Workers who dig coal wanted better conditions.',
+             4),
+            
+            ('enu_s1_q5', 'enu_science_001_lvl1',
+             'True or False: Fossil fuels like coal take millions of years to form.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'Coal, oil, and natural gas are fossil fuels that formed over millions of years from dead organisms. That''s why they''re considered non-renewable resources.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// PLATEAU STATE MODULES
+// =====================================================
+fn seed_plateau_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- PLATEAU MODULE 1: THE NOK CIVILIZATION (History)
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('pla_history_001', 'PLA', 'History', 'The Nok Civilization', 
+                'Journey back 2,500 years to discover Africa''s oldest known sculpture tradition!',
+                4, 550, 22, 'landmark');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('pla_history_001',
+                'Nok terracotta sculptures are so old that they predate the Roman Empire! The earliest pieces date to around 500 BCE.',
+                'The Nok people were among the first in sub-Saharan Africa to smelt iron - a technological achievement that changed human history!',
+                'Welcome, archaeologist! You are about to discover one of Africa''s most mysterious ancient civilizations. The Nok people created incredible art and technology thousands of years ago.',
+                'The Nok culture was discovered by accident in 1928 when tin miners found terracotta sculptures. The civilization existed from about 1500 BCE to 500 CE.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('pla_history_001_lvl1', 'pla_history_001', 'Ancient Sculptors', 'medium', 1, 120, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('pla_h1_q1', 'pla_history_001_lvl1',
+             'Nok sculptures are made from:',
+             'multiple_choice',
+             '[{"id":"a","text":"Bronze"},{"id":"b","text":"Terracotta (baked clay)"},{"id":"c","text":"Stone"},{"id":"d","text":"Wood"}]',
+             'b', 20,
+             'Terracotta means "baked earth" in Italian. The Nok people created their sculptures from clay and fired them at high temperatures.',
+             'This material comes from the earth and is hardened by fire.',
+             1),
+            
+            ('pla_h1_q2', 'pla_history_001_lvl1',
+             'How old are the oldest Nok sculptures?',
+             'multiple_choice',
+             '[{"id":"a","text":"About 100 years"},{"id":"b","text":"About 500 years"},{"id":"c","text":"About 2,500 years"},{"id":"d","text":"About 50 years"}]',
+             'c', 20,
+             'The oldest Nok sculptures date to around 500 BCE, making them about 2,500 years old - older than many ancient civilizations!',
+             'They''re VERY old - even older than some famous ancient empires.',
+             2),
+            
+            ('pla_h1_q3', 'pla_history_001_lvl1',
+             'The Nok were pioneers in:',
+             'multiple_choice',
+             '[{"id":"a","text":"Building pyramids"},{"id":"b","text":"Iron smelting"},{"id":"c","text":"Making paper"},{"id":"d","text":"Sailing ships"}]',
+             'b', 25,
+             'The Nok were among the first people in sub-Saharan Africa to smelt iron - heating iron ore to extract metal for tools and weapons.',
+             'This technology involves heating metal from rocks.',
+             3),
+            
+            ('pla_h1_q4', 'pla_history_001_lvl1',
+             'Nok sculptures were discovered by:',
+             'multiple_choice',
+             '[{"id":"a","text":"Archaeologists looking for them"},{"id":"b","text":"Tin miners by accident"},{"id":"c","text":"Farmers"},{"id":"d","text":"Fishermen"}]',
+             'b', 20,
+             'The first Nok sculpture was found accidentally in 1928 by workers mining for tin in present-day Plateau State.',
+             'They were looking for something else entirely.',
+             4),
+            
+            ('pla_h1_q5', 'pla_history_001_lvl1',
+             'True or False: Jos, capital of Plateau State, has a museum dedicated to Nok art.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'The Jos Museum was established in 1952 and houses one of the finest collections of Nok terracotta sculptures in the world.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// BAUCHI STATE MODULES
+// =====================================================
+fn seed_bauchi_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- BAUCHI MODULE 1: YANKARI WILDLIFE (Science/Nature)
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('bau_science_001', 'BAU', 'Science', 'Yankari Wildlife Safari', 
+                'Explore Nigeria''s premier wildlife reserve and learn about animal conservation!',
+                5, 550, 24, 'paw-print');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('bau_science_001',
+                'Yankari has warm springs called Wikki Warm Springs where the water stays at 31°C all year round! Animals and humans have bathed there for centuries.',
+                'Yankari has the largest remaining herd of African forest elephants in Nigeria - over 300 elephants call the reserve home!',
+                'Welcome to Yankari Game Reserve, young ranger! Get ready for a safari where you''ll learn about Nigeria''s amazing wildlife and why conservation matters.',
+                'Yankari was established as a game reserve in 1962 and became a National Park in 1991. It covers over 2,244 square kilometers.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('bau_science_001_lvl1', 'bau_science_001', 'Safari Guide', 'medium', 1, 120, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('bau_s1_q1', 'bau_science_001_lvl1',
+             'Which animal is Yankari most famous for protecting?',
+             'multiple_choice',
+             '[{"id":"a","text":"Lions"},{"id":"b","text":"Elephants"},{"id":"c","text":"Zebras"},{"id":"d","text":"Giraffes"}]',
+             'b', 20,
+             'Yankari has Nigeria''s largest population of elephants. These gentle giants are a major attraction for visitors.',
+             'Think of the largest land animal.',
+             1),
+            
+            ('bau_s1_q2', 'bau_science_001_lvl1',
+             'Wikki Warm Springs gets its heat from:',
+             'multiple_choice',
+             '[{"id":"a","text":"The sun"},{"id":"b","text":"Underground volcanic activity"},{"id":"c","text":"A heating machine"},{"id":"d","text":"Hot air"}]',
+             'b', 20,
+             'Warm springs are heated by geothermal activity deep underground where hot rocks heat the water naturally.',
+             'The heat comes from deep inside the Earth.',
+             2),
+            
+            ('bau_s1_q3', 'bau_science_001_lvl1',
+             'What does "conservation" mean?',
+             'multiple_choice',
+             '[{"id":"a","text":"Destroying nature"},{"id":"b","text":"Protecting and preserving nature"},{"id":"c","text":"Building cities"},{"id":"d","text":"Hunting animals"}]',
+             'b', 15,
+             'Conservation means taking care of nature so that plants, animals, and natural places survive for future generations.',
+             'It''s about keeping things safe and preserved.',
+             3),
+            
+            ('bau_s1_q4', 'bau_science_001_lvl1',
+             'Elephants are herbivores, which means they eat:',
+             'multiple_choice',
+             '[{"id":"a","text":"Only meat"},{"id":"b","text":"Only plants"},{"id":"c","text":"Both meat and plants"},{"id":"d","text":"Nothing"}]',
+             'b', 15,
+             'Herbivores only eat plants. Elephants eat grass, leaves, bark, and fruit - an adult elephant can eat up to 300 kg of food per day!',
+             'The prefix "herb" relates to plants.',
+             4),
+            
+            ('bau_s1_q5', 'bau_science_001_lvl1',
+             'True or False: National Parks help protect endangered animals.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'National Parks create safe spaces where animals can live without threats from hunting or habitat destruction.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// ANAMBRA STATE MODULES
+// =====================================================
+fn seed_anambra_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- ANAMBRA MODULE 1: ONITSHA MARKET MATHEMATICS
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('ana_math_001', 'ANA', 'Mathematics', 'Onitsha Market Mathematics', 
+                'Learn percentages and profit calculations at Africa''s largest market!',
+                5, 600, 25, 'calculator');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('ana_math_001',
+                'Onitsha Main Market has over 10,000 shops and is the largest market in Africa by the number of traders! You can find literally anything for sale.',
+                'The Igbo people have a saying: "Ahịa adịghị egbu onye ohu" - meaning "trade doesn''t kill the diligent." Business skills are highly valued!',
+                'Welcome to Onitsha Market! Here, fortunes are made by those who master the mathematics of business. Learn to calculate profit, loss, and percentages!',
+                'Onitsha has been a trading center since before the colonial era. Its location on the River Niger made it perfect for commerce.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('ana_math_001_lvl1', 'ana_math_001', 'Market Mathematics', 'medium', 1, 130, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('ana_m1_q1', 'ana_math_001_lvl1',
+             'A trader buys goods for ₦10,000 and sells for ₦12,000. What is the profit?',
+             'multiple_choice',
+             '[{"id":"a","text":"₦1,000"},{"id":"b","text":"₦2,000"},{"id":"c","text":"₦10,000"},{"id":"d","text":"₦22,000"}]',
+             'b', 20,
+             'Profit = Selling Price - Cost Price. So ₦12,000 - ₦10,000 = ₦2,000 profit.',
+             'Subtract what you paid from what you received.',
+             1),
+            
+            ('ana_m1_q2', 'ana_math_001_lvl1',
+             'If something costs ₦500 and you mark it up by 20%, what is the selling price?',
+             'multiple_choice',
+             '[{"id":"a","text":"₦520"},{"id":"b","text":"₦600"},{"id":"c","text":"₦700"},{"id":"d","text":"₦400"}]',
+             'b', 25,
+             '20% of ₦500 = ₦100. So selling price = ₦500 + ₦100 = ₦600.',
+             '20% of 500 is 100. Add that to the original price.',
+             2),
+            
+            ('ana_m1_q3', 'ana_math_001_lvl1',
+             'A trader sold goods for ₦8,000 but made a loss of ₦2,000. What was the cost price?',
+             'multiple_choice',
+             '[{"id":"a","text":"₦6,000"},{"id":"b","text":"₦10,000"},{"id":"c","text":"₦8,000"},{"id":"d","text":"₦16,000"}]',
+             'b', 25,
+             'If there was a loss, the cost was higher than the selling price. Cost = Selling Price + Loss = ₦8,000 + ₦2,000 = ₦10,000.',
+             'Loss means they paid more than they received back.',
+             3),
+            
+            ('ana_m1_q4', 'ana_math_001_lvl1',
+             'What is 25% of ₦4,000?',
+             'multiple_choice',
+             '[{"id":"a","text":"₦500"},{"id":"b","text":"₦1,000"},{"id":"c","text":"₦2,500"},{"id":"d","text":"₦250"}]',
+             'b', 20,
+             '25% is the same as 1/4 or 0.25. So 25% of ₦4,000 = ₦4,000 × 0.25 = ₦1,000.',
+             '25% is one quarter. What is one quarter of 4000?',
+             4),
+            
+            ('ana_m1_q5', 'ana_math_001_lvl1',
+             'True or False: If you buy at ₦100 and sell at ₦80, you make a loss.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'When you sell for less than you bought, you make a loss. Here the loss is ₦100 - ₦80 = ₦20.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// OGUN STATE MODULES
+// =====================================================
+fn seed_ogun_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('ogu_english_001', 'OGU', 'English', 'Words of Wole Soyinka', 
+                'Learn the power of language from Africa''s first Nobel Laureate in Literature!',
+                4, 550, 22, 'book-open');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('ogu_english_001',
+                'Wole Soyinka was born in Abeokuta, Ogun State in 1934. He won the Nobel Prize for Literature in 1986 - the first African to win this prestigious award!',
+                'Soyinka once took over a radio station at gunpoint to prevent false election results from being broadcast! He spent years in prison for his activism.',
+                'Welcome to the literary heart of Nigeria! Here, we explore the power of words through the lens of our greatest writer. Learn vocabulary, expression, and the art of storytelling.',
+                'Abeokuta means "Under the Rock" - referring to Olumo Rock, where the Egba people took refuge from slave raiders.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('ogu_english_001_lvl1', 'ogu_english_001', 'Power of Words', 'medium', 1, 120, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('ogu_e1_q1', 'ogu_english_001_lvl1',
+             'What is a synonym for "brave"?',
+             'multiple_choice',
+             '[{"id":"a","text":"Scared"},{"id":"b","text":"Courageous"},{"id":"c","text":"Weak"},{"id":"d","text":"Tired"}]',
+             'b', 15,
+             'Courageous means showing courage or bravery. It''s a synonym (word with similar meaning) to brave.',
+             'Which word means showing no fear?',
+             1),
+            
+            ('ogu_e1_q2', 'ogu_english_001_lvl1',
+             'Identify the verb in: "The eagle soars above the clouds."',
+             'multiple_choice',
+             '[{"id":"a","text":"eagle"},{"id":"b","text":"soars"},{"id":"c","text":"above"},{"id":"d","text":"clouds"}]',
+             'b', 20,
+             'A verb is an action word. "Soars" describes what the eagle does - the action of flying high.',
+             'What is the eagle doing?',
+             2),
+            
+            ('ogu_e1_q3', 'ogu_english_001_lvl1',
+             'What is the opposite (antonym) of "ancient"?',
+             'multiple_choice',
+             '[{"id":"a","text":"Old"},{"id":"b","text":"Modern"},{"id":"c","text":"Historic"},{"id":"d","text":"Traditional"}]',
+             'b', 15,
+             'Modern means relating to present time, the opposite of ancient which means very old.',
+             'If ancient means very old, what means very new?',
+             3),
+            
+            ('ogu_e1_q4', 'ogu_english_001_lvl1',
+             'Which sentence uses correct punctuation?',
+             'multiple_choice',
+             '[{"id":"a","text":"where are you going"},{"id":"b","text":"Where are you going?"},{"id":"c","text":"Where are you going"},{"id":"d","text":"where are you going."}]',
+             'b', 20,
+             'Questions need a capital letter at the start and a question mark at the end.',
+             'Questions need special punctuation at the end.',
+             4),
+            
+            ('ogu_e1_q5', 'ogu_english_001_lvl1',
+             'True or False: Wole Soyinka won the Nobel Prize for Peace.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'false', 15,
+             'Wole Soyinka won the Nobel Prize for Literature, not Peace. He was honored for his dramatic works.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// OYO STATE MODULES  
+// =====================================================
+fn seed_oyo_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('oyo_history_001', 'OYO', 'History', 'The Oyo Empire', 
+                'Discover one of Africa''s most powerful empires that ruled for over 400 years!',
+                4, 600, 25, 'crown');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('oyo_history_001',
+                'The Oyo Empire had a powerful cavalry (horse soldiers) that made it one of the most feared military forces in West Africa!',
+                'The Alaafin of Oyo was not an absolute ruler - a council called the Oyo Mesi could even remove him from power. This was an early form of checks and balances!',
+                'Welcome to the seat of an empire! The Oyo Empire once controlled trade routes across West Africa. Learn about its rise, governance, and legacy.',
+                'At its peak in the 17th-18th centuries, the Oyo Empire stretched from western Nigeria to modern-day Togo and Ghana.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('oyo_history_001_lvl1', 'oyo_history_001', 'Rise of an Empire', 'medium', 1, 130, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('oyo_h1_q1', 'oyo_history_001_lvl1',
+             'What is the title of the king of the Oyo Empire?',
+             'multiple_choice',
+             '[{"id":"a","text":"Oba"},{"id":"b","text":"Alaafin"},{"id":"c","text":"Sultan"},{"id":"d","text":"Emir"}]',
+             'b', 20,
+             'The Alaafin (meaning "Owner of the Palace") is the title of the king of the Oyo Empire. The current Alaafin still holds this traditional title.',
+             'This title is unique to Oyo.',
+             1),
+            
+            ('oyo_h1_q2', 'oyo_history_001_lvl1',
+             'What military advantage helped the Oyo Empire dominate West Africa?',
+             'multiple_choice',
+             '[{"id":"a","text":"Ships"},{"id":"b","text":"Cavalry (horses)"},{"id":"c","text":"Cannons"},{"id":"d","text":"Elephants"}]',
+             'b', 20,
+             'The Oyo cavalry was the key to their military success. Horses allowed them to move quickly across the savanna and overwhelm enemies.',
+             'These animals are fast and can carry riders.',
+             2),
+            
+            ('oyo_h1_q3', 'oyo_history_001_lvl1',
+             'The Oyo Mesi was:',
+             'multiple_choice',
+             '[{"id":"a","text":"A type of food"},{"id":"b","text":"A council of chiefs who advised the Alaafin"},{"id":"c","text":"A weapon"},{"id":"d","text":"A festival"}]',
+             'b', 25,
+             'The Oyo Mesi was a powerful council of seven chiefs who could check the Alaafin''s power and even remove him if necessary.',
+             'Think of a group of advisors.',
+             3),
+            
+            ('oyo_h1_q4', 'oyo_history_001_lvl1',
+             'Ibadan, the capital of Oyo State, was once the largest city in Africa by:',
+             'multiple_choice',
+             '[{"id":"a","text":"Population"},{"id":"b","text":"Geographical area"},{"id":"c","text":"Number of buildings"},{"id":"d","text":"Wealth"}]',
+             'b', 20,
+             'Ibadan was once the largest city in Africa by geographical area, sprawling across seven hills.',
+             'Think about space, not people.',
+             4),
+            
+            ('oyo_h1_q5', 'oyo_history_001_lvl1',
+             'True or False: The Oyo Empire traded slaves.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 20,
+             'Unfortunately, the Oyo Empire was heavily involved in the Atlantic slave trade, which contributed to both its wealth and eventual decline.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// OSUN STATE MODULES
+// =====================================================
+fn seed_osun_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('osu_culture_001', 'OSU', 'Culture', 'The Sacred Grove', 
+                'Explore the UNESCO World Heritage Site and learn about Yoruba spirituality!',
+                4, 500, 20, 'trees');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('osu_culture_001',
+                'The Osun-Osogbo Sacred Grove is one of the last remaining primary high forests in southern Nigeria. It became a UNESCO World Heritage Site in 2005!',
+                'The annual Osun Festival attracts hundreds of thousands of visitors, including Yoruba descendants from Brazil, Cuba, and the Caribbean!',
+                'Welcome to the sacred forest! The Osun-Osogbo Grove is where nature, art, and spirituality meet. Learn about Yoruba beliefs and the importance of protecting sacred spaces.',
+                'The grove is dedicated to Osun, the Yoruba goddess of fertility, love, and the river. It contains sculptures by Austrian artist Susanne Wenger who devoted her life to preserving Yoruba culture.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('osu_culture_001_lvl1', 'osu_culture_001', 'Secrets of the Grove', 'medium', 1, 110, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('osu_c1_q1', 'osu_culture_001_lvl1',
+             'Osun is the Yoruba goddess of:',
+             'multiple_choice',
+             '[{"id":"a","text":"War"},{"id":"b","text":"Fertility and rivers"},{"id":"c","text":"The sky"},{"id":"d","text":"Fire"}]',
+             'b', 20,
+             'Osun (also spelled Oshun) is the goddess of fertility, love, fresh water, and the Osun River. She is one of the most beloved Yoruba deities.',
+             'Think about water and life.',
+             1),
+            
+            ('osu_c1_q2', 'osu_culture_001_lvl1',
+             'What international organization recognized the Osun-Osogbo Grove?',
+             'multiple_choice',
+             '[{"id":"a","text":"FIFA"},{"id":"b","text":"UNESCO"},{"id":"c","text":"WHO"},{"id":"d","text":"UNICEF"}]',
+             'b', 15,
+             'UNESCO (United Nations Educational, Scientific and Cultural Organization) designated it a World Heritage Site in 2005.',
+             'This organization protects cultural sites.',
+             2),
+            
+            ('osu_c1_q3', 'osu_culture_001_lvl1',
+             'What does "World Heritage Site" mean?',
+             'multiple_choice',
+             '[{"id":"a","text":"A place owned by the United Nations"},{"id":"b","text":"A place of global cultural or natural importance"},{"id":"c","text":"A tourist attraction"},{"id":"d","text":"An ancient ruin"}]',
+             'b', 20,
+             'World Heritage Sites are places of outstanding cultural or natural importance that belong to all humanity and deserve protection.',
+             'It means important to the whole world.',
+             3),
+            
+            ('osu_c1_q4', 'osu_culture_001_lvl1',
+             'When is the Osun Festival celebrated?',
+             'multiple_choice',
+             '[{"id":"a","text":"January"},{"id":"b","text":"August"},{"id":"c","text":"December"},{"id":"d","text":"March"}]',
+             'b', 15,
+             'The Osun Festival is held in August each year. It includes a grand procession to the river where offerings are made.',
+             'It''s during the rainy season.',
+             4),
+            
+            ('osu_c1_q5', 'osu_culture_001_lvl1',
+             'True or False: The Osun Grove is an artificial (man-made) forest.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'false', 15,
+             'The Osun Grove is a natural primary forest - one of the last remaining ancient forests in southern Nigeria.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// RIVERS STATE MODULES
+// =====================================================
+fn seed_rivers_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('riv_science_001', 'RIV', 'Science', 'Oil and Energy', 
+                'Discover how oil powers Nigeria and learn about energy resources!',
+                5, 600, 25, 'fuel');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('riv_science_001',
+                'Nigeria is Africa''s largest oil producer and one of the top 10 producers in the world! Most of this oil comes from the Niger Delta region.',
+                'Oil was first discovered in commercial quantities in Nigeria at Oloibiri, Bayelsa State in 1956. This changed Nigeria''s economy forever!',
+                'Welcome to the Treasure Base of the Nation! Rivers State is at the heart of Nigeria''s oil industry. Learn about petroleum, energy, and environmental responsibility.',
+                'Port Harcourt was founded in 1912 as a port for exporting coal. Today it''s the center of Nigeria''s oil industry.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('riv_science_001_lvl1', 'riv_science_001', 'Black Gold', 'medium', 1, 130, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('riv_s1_q1', 'riv_science_001_lvl1',
+             'Oil is often called "black gold" because:',
+             'multiple_choice',
+             '[{"id":"a","text":"It is actually black gold metal"},{"id":"b","text":"It is very valuable like gold"},{"id":"c","text":"It was discovered in a gold mine"},{"id":"d","text":"It can be turned into gold"}]',
+             'b', 15,
+             'Oil is called "black gold" because it is black in color and extremely valuable - it has made countries rich!',
+             'Think about value and color.',
+             1),
+            
+            ('riv_s1_q2', 'riv_science_001_lvl1',
+             'What products come from petroleum (crude oil)?',
+             'multiple_choice',
+             '[{"id":"a","text":"Only petrol"},{"id":"b","text":"Petrol, diesel, plastics, and more"},{"id":"c","text":"Only plastics"},{"id":"d","text":"Only kerosene"}]',
+             'b', 20,
+             'Crude oil is refined into many products: petrol, diesel, kerosene, plastics, chemicals, and even medicines!',
+             'Oil is used to make many different things.',
+             2),
+            
+            ('riv_s1_q3', 'riv_science_001_lvl1',
+             'Oil spills can harm the environment by:',
+             'multiple_choice',
+             '[{"id":"a","text":"Making the land more fertile"},{"id":"b","text":"Killing fish and polluting water"},{"id":"c","text":"Creating new islands"},{"id":"d","text":"Cooling the climate"}]',
+             'b', 20,
+             'Oil spills are devastating to the environment. They kill fish, poison water, and destroy farmland for years.',
+             'Oil is toxic to living things.',
+             3),
+            
+            ('riv_s1_q4', 'riv_science_001_lvl1',
+             'NNPC stands for:',
+             'multiple_choice',
+             '[{"id":"a","text":"Nigerian National Petroleum Corporation"},{"id":"b","text":"National Nigerian Petrol Company"},{"id":"c","text":"Niger National Power Corporation"},{"id":"d","text":"Nigerian Natural Products Company"}]',
+             'a', 20,
+             'NNPC (Nigerian National Petroleum Corporation) is the government company that manages Nigeria''s oil resources.',
+             'The P stands for Petroleum.',
+             4),
+            
+            ('riv_s1_q5', 'riv_science_001_lvl1',
+             'True or False: Oil is a renewable resource.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'false', 20,
+             'Oil is NOT renewable - it takes millions of years to form. Once we use it all, it''s gone. That''s why we need to find alternative energy sources.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// CROSS RIVER STATE MODULES
+// =====================================================
+fn seed_crossriver_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('crs_culture_001', 'CRS', 'Culture', 'Carnival and Conservation', 
+                'Experience Africa''s biggest street party and learn about rainforest conservation!',
+                6, 650, 28, 'party-popper');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('crs_culture_001',
+                'The Calabar Carnival attracts over 2 million visitors each December! It features elaborate costumes, dance competitions, and street parties.',
+                'Cross River State contains the last remaining virgin tropical rainforest in Nigeria - home to rare gorillas, drills, and hundreds of bird species!',
+                'Welcome to the People''s Paradise! From the colorful Calabar Carnival to the ancient rainforests, Cross River State is a land of celebration and nature.',
+                'Calabar was one of the earliest points of contact between Nigeria and Europe. The old colonial buildings still stand in the city.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('crs_culture_001_lvl1', 'crs_culture_001', 'Festival and Forest', 'hard', 1, 140, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('crs_c1_q1', 'crs_culture_001_lvl1',
+             'When is the Calabar Carnival held?',
+             'multiple_choice',
+             '[{"id":"a","text":"January"},{"id":"b","text":"August"},{"id":"c","text":"December"},{"id":"d","text":"March"}]',
+             'c', 15,
+             'The Calabar Carnival runs throughout December, culminating in a grand finale on December 28th.',
+             'It''s during the Christmas season.',
+             1),
+            
+            ('crs_c1_q2', 'crs_culture_001_lvl1',
+             'What endangered animal is protected in Cross River forests?',
+             'multiple_choice',
+             '[{"id":"a","text":"Lions"},{"id":"b","text":"Cross River Gorilla"},{"id":"c","text":"Polar bears"},{"id":"d","text":"Tigers"}]',
+             'b', 25,
+             'The Cross River Gorilla is one of the world''s most endangered primates with only about 300 left in the wild.',
+             'This great ape shares its name with the state.',
+             2),
+            
+            ('crs_c1_q3', 'crs_culture_001_lvl1',
+             '"Conservation" of rainforests means:',
+             'multiple_choice',
+             '[{"id":"a","text":"Cutting down all trees"},{"id":"b","text":"Protecting and preserving them"},{"id":"c","text":"Building cities in them"},{"id":"d","text":"Burning them"}]',
+             'b', 15,
+             'Conservation means protecting natural resources and environments so they survive for future generations.',
+             'Think about keeping something safe.',
+             3),
+            
+            ('crs_c1_q4', 'crs_culture_001_lvl1',
+             'Why are rainforests important?',
+             'multiple_choice',
+             '[{"id":"a","text":"They produce oxygen and absorb carbon dioxide"},{"id":"b","text":"They are only for tourists"},{"id":"c","text":"They have no importance"},{"id":"d","text":"They block the sun"}]',
+             'a', 20,
+             'Rainforests are the "lungs of the Earth" - they produce oxygen, absorb CO2, and are home to millions of species.',
+             'Think about what plants do with air.',
+             4),
+            
+            ('crs_c1_q5', 'crs_culture_001_lvl1',
+             'True or False: The Calabar Carnival is Africa''s biggest street party.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'The Calabar Carnival is proudly called "Africa''s Biggest Street Party" - it rivals the carnivals of Rio and Trinidad!',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// SOKOTO STATE MODULES
+// =====================================================
+fn seed_sokoto_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('sok_history_001', 'SOK', 'History', 'The Sokoto Caliphate', 
+                'Learn about one of the largest empires in 19th century Africa!',
+                6, 600, 25, 'building-2');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('sok_history_001',
+                'The Sokoto Caliphate was the largest state in Africa in the 19th century! It included most of northern Nigeria and parts of neighboring countries.',
+                'The Sultan of Sokoto is still regarded as the spiritual leader of Muslims in Nigeria today - a tradition that has continued for over 200 years!',
+                'Welcome to the Seat of the Caliphate! Sokoto is the spiritual heart of Islam in Nigeria. Learn about Usman dan Fodio, the jihad, and the empire he built.',
+                'Usman dan Fodio founded the Sokoto Caliphate after a religious jihad in 1804. His descendants still hold the title of Sultan.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('sok_history_001_lvl1', 'sok_history_001', 'Rise of the Caliphate', 'hard', 1, 130, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('sok_h1_q1', 'sok_history_001_lvl1',
+             'Who founded the Sokoto Caliphate?',
+             'multiple_choice',
+             '[{"id":"a","text":"Ahmadu Bello"},{"id":"b","text":"Usman dan Fodio"},{"id":"c","text":"Muhammad Bello"},{"id":"d","text":"Sani Abacha"}]',
+             'b', 20,
+             'Usman dan Fodio (1754-1817) was a religious teacher who led a jihad and founded the Sokoto Caliphate in 1804.',
+             'His name starts with "Usman".',
+             1),
+            
+            ('sok_h1_q2', 'sok_history_001_lvl1',
+             'A "caliphate" is:',
+             'multiple_choice',
+             '[{"id":"a","text":"A type of building"},{"id":"b","text":"An Islamic state led by a caliph"},{"id":"c","text":"A market"},{"id":"d","text":"A river"}]',
+             'b', 20,
+             'A caliphate is a form of Islamic government led by a caliph (successor to the Prophet Muhammad).',
+             'It relates to Islamic leadership.',
+             2),
+            
+            ('sok_h1_q3', 'sok_history_001_lvl1',
+             'What year was the Sokoto Caliphate founded?',
+             'multiple_choice',
+             '[{"id":"a","text":"1804"},{"id":"b","text":"1960"},{"id":"c","text":"1500"},{"id":"d","text":"1900"}]',
+             'a', 20,
+             'The Sokoto Caliphate was established in 1804 after Usman dan Fodio''s successful jihad.',
+             'It was early in the 19th century.',
+             3),
+            
+            ('sok_h1_q4', 'sok_history_001_lvl1',
+             'The Sultan of Sokoto today is the:',
+             'multiple_choice',
+             '[{"id":"a","text":"President of Nigeria"},{"id":"b","text":"Spiritual leader of Nigerian Muslims"},{"id":"c","text":"Governor of Sokoto"},{"id":"d","text":"Head of the Army"}]',
+             'b', 20,
+             'The Sultan of Sokoto is the highest traditional Islamic authority in Nigeria and leads prayers at major Muslim festivals.',
+             'He leads in religious, not political matters.',
+             4),
+            
+            ('sok_h1_q5', 'sok_history_001_lvl1',
+             'True or False: The Sokoto Caliphate ended when the British conquered it in 1903.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 20,
+             'The British defeated the Sokoto Caliphate in 1903, but allowed the Sultan to continue as a religious and traditional ruler.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// BORNO STATE MODULES
+// =====================================================
+fn seed_borno_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('bor_history_001', 'BOR', 'History', 'The Kanem-Bornu Empire', 
+                'Discover Africa''s longest-lasting empire - over 1000 years of history!',
+                7, 700, 30, 'landmark');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('bor_history_001',
+                'The Kanem-Bornu Empire lasted for over 1000 years (from about 700 CE to 1900 CE) - one of the longest-lasting empires in world history!',
+                'The mai (king) of Kanem-Bornu went on pilgrimage to Mecca with thousands of followers. They were so wealthy they gave away gold along the way!',
+                'Welcome to Home of Peace! Borno State was the center of one of Africa''s greatest empires. Learn about the Kanem-Bornu legacy.',
+                'The Kanuri people built this great empire around Lake Chad. At its height, it controlled trade routes across the Sahara.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('bor_history_001_lvl1', 'bor_history_001', 'A Thousand Year Empire', 'hard', 1, 150, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('bor_h1_q1', 'bor_history_001_lvl1',
+             'How long did the Kanem-Bornu Empire last?',
+             'multiple_choice',
+             '[{"id":"a","text":"About 100 years"},{"id":"b","text":"About 500 years"},{"id":"c","text":"Over 1000 years"},{"id":"d","text":"About 50 years"}]',
+             'c', 20,
+             'The Kanem-Bornu Empire lasted over 1000 years - from about 700 CE to 1900 CE!',
+             'It''s the longest option.',
+             1),
+            
+            ('bor_h1_q2', 'bor_history_001_lvl1',
+             'Lake Chad was important to the empire because:',
+             'multiple_choice',
+             '[{"id":"a","text":"It provided water for people and trade"},{"id":"b","text":"It was full of gold"},{"id":"c","text":"It was used for swimming only"},{"id":"d","text":"It had no importance"}]',
+             'a', 20,
+             'Lake Chad provided water, fish, and fertile land. It was also a crossroads for trade routes.',
+             'Think about what people need to survive.',
+             2),
+            
+            ('bor_h1_q3', 'bor_history_001_lvl1',
+             'The king of Kanem-Bornu was called:',
+             'multiple_choice',
+             '[{"id":"a","text":"Oba"},{"id":"b","text":"Mai"},{"id":"c","text":"Sultan"},{"id":"d","text":"Alaafin"}]',
+             'b', 20,
+             'The king was called Mai (also spelled "Mai" or "May"). This title was used for centuries.',
+             'It''s a short, three-letter title.',
+             3),
+            
+            ('bor_h1_q4', 'bor_history_001_lvl1',
+             'Which ethnic group founded the Kanem-Bornu Empire?',
+             'multiple_choice',
+             '[{"id":"a","text":"Yoruba"},{"id":"b","text":"Igbo"},{"id":"c","text":"Kanuri"},{"id":"d","text":"Hausa"}]',
+             'c', 20,
+             'The Kanuri people founded and ruled the Kanem-Bornu Empire. They are still the dominant group in Borno State today.',
+             'The state is named after them (Bornu = Borno).',
+             4),
+            
+            ('bor_h1_q5', 'bor_history_001_lvl1',
+             'True or False: Kanem-Bornu was one of the first African kingdoms to adopt Islam.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 20,
+             'Kanem adopted Islam in the 11th century, making it one of the earliest Islamic states in sub-Saharan Africa.',
+             NULL,
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    Ok(())
+}
+
+// =====================================================
+// TARABA STATE MODULES
+// =====================================================
+fn seed_taraba_modules(conn: &Connection) -> Result<(), DatabaseError> {
+    conn.execute_batch(r#"
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        VALUES ('tar_geography_001', 'TAR', 'Geography', 'The Mambilla Plateau', 
+                'Explore Nigeria''s highest point and learn about highland geography!',
+                6, 550, 22, 'mountain');
+        
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('tar_geography_001',
+                'The Mambilla Plateau is at 1,800 meters (about 6,000 feet) above sea level - so high that it gets cold and foggy, unlike the rest of Nigeria!',
+                'Because of its cool climate, Mambilla grows tea - one of the few places in Nigeria where tea is cultivated!',
+                'Welcome to Nature''s Gift to the Nation! Taraba State has Nigeria''s highest plateau. Learn about mountains, climate, and highland life.',
+                'The Mambilla Plateau is home to the Mambilla people who have lived at these heights for centuries.');
+        
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('tar_geography_001_lvl1', 'tar_geography_001', 'Highland Adventures', 'hard', 1, 120, NULL);
+        
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('tar_g1_q1', 'tar_geography_001_lvl1',
+             'A plateau is:',
+             'multiple_choice',
+             '[{"id":"a","text":"A deep valley"},{"id":"b","text":"A flat area of high land"},{"id":"c","text":"A river"},{"id":"d","text":"A desert"}]',
+             'b', 15,
+             'A plateau is a flat, elevated area of land - like a table top raised high above the surrounding areas.',
+             'Think of a flat-topped mountain.',
+             1),
+            
+            ('tar_g1_q2', 'tar_geography_001_lvl1',
+             'Why is the Mambilla Plateau cooler than most of Nigeria?',
+             'multiple_choice',
+             '[{"id":"a","text":"It has air conditioning"},{"id":"b","text":"It is at high altitude"},{"id":"c","text":"It is near the sea"},{"id":"d","text":"It has no sun"}]',
+             'b', 20,
+             'Temperature drops as altitude increases. At 1,800 meters high, Mambilla is much cooler than lowland Nigeria.',
+             'Height affects temperature.',
+             2),
+            
+            ('tar_g1_q3', 'tar_geography_001_lvl1',
+             'What crop is grown on the Mambilla Plateau because of its cool climate?',
+             'multiple_choice',
+             '[{"id":"a","text":"Rice"},{"id":"b","text":"Tea"},{"id":"c","text":"Cassava"},{"id":"d","text":"Palm oil"}]',
+             'b', 20,
+             'Tea needs cool, misty conditions - perfect for the Mambilla Plateau! Nigeria produces tea there.',
+             'This drink is usually served hot.',
+             3),
+            
+            ('tar_g1_q4', 'tar_geography_001_lvl1',
+             'Approximately how high is the Mambilla Plateau?',
+             'multiple_choice',
+             '[{"id":"a","text":"100 meters"},{"id":"b","text":"500 meters"},{"id":"c","text":"1,800 meters"},{"id":"d","text":"5,000 meters"}]',
+             'c', 20,
+             'The Mambilla Plateau reaches about 1,800 meters (6,000 feet) above sea level.',
+             'It''s nearly 2 kilometers high.',
+             4),
+            
+            ('tar_g1_q5', 'tar_geography_001_lvl1',
+             'True or False: The Mambilla Plateau is Nigeria''s highest point.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'The Mambilla Plateau contains Chappal Waddi, the highest peak in Nigeria at about 2,419 meters.',
+             NULL,
              5);
     "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
     
