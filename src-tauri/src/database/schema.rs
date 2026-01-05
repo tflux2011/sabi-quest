@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS modules (
     total_xp INTEGER DEFAULT 0,    -- Total XP available in this module
     estimated_time INTEGER,        -- Estimated completion time in minutes
     icon TEXT,                     -- Icon identifier for the module
+    education_level TEXT DEFAULT 'all', -- Target education level: "primary_lower", "primary_upper", "jss", "sss", "all"
+    interest_tags TEXT,            -- JSON array of interest tags: ["history", "culture", "geography", "food", "music", "languages"]
     FOREIGN KEY(state_id) REFERENCES states(id) ON DELETE CASCADE
 );
 
@@ -160,6 +162,7 @@ CREATE TABLE IF NOT EXISTS users (
     avatar_json TEXT,              -- JSON object with avatar customization
     birth_year INTEGER,            -- User's birth year for age-appropriate content
     education_level TEXT,          -- "primary_lower", "primary_upper", "jss", "sss"
+    interests_json TEXT,           -- JSON array of interest IDs: ["history", "culture", "geography", "food", "music", "languages"]
     total_xp INTEGER DEFAULT 0,
     current_level INTEGER DEFAULT 1,
     cowrie_shells INTEGER DEFAULT 0, -- In-game currency

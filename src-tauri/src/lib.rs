@@ -9,6 +9,8 @@ use tauri::Manager;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             // Initialize logging in debug mode
             if cfg!(debug_assertions) {
@@ -45,6 +47,7 @@ pub fn run() {
             database::get_module_content,
             database::update_level_progress,
             database::reset_user_progress,
+            database::get_recommended_modules,
             // The Sabi Codex - Encyclopedia commands
             database::get_all_encyclopedia_entries,
             database::get_encyclopedia_by_category,

@@ -23,7 +23,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost data:; script-src 'self'; style-src 'self' 'unsafe-inline'",
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.github.com https://github.com",
       "assetProtocol": {
         "enable": true,
         "scope": ["$APPDATA/**", "$RESOURCE/**"]
@@ -39,6 +39,25 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "createUpdaterArtifacts": true,
+    "macOS": {
+      "signingIdentity": null,
+      "minimumSystemVersion": "10.13"
+    },
+    "windows": {
+      "signCommand": null
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJDNkMxM0RDOUEyNjA1NEIKUldSTEJTYWEzQk5zTEpURkFOdnFjNWhtMGtCSUQ3MU1sRzF4TmFyaXRLVTlXbzRHaDNROThJMlAK",
+      "endpoints": [
+        "https://github.com/tflux2011/sabi-quest/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

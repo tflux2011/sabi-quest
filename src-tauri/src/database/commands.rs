@@ -59,7 +59,18 @@ pub async fn get_all_states(
         r#"
         SELECT 
             s.id, s.name, s.region, s.zone, s.unlock_level, s.landmark_name, s.landmark_image, s.description, s.fun_fact,
-            up.stars, up.is_completed, up.best_score, up.attempts, up.last_played_at,
+            up.stars, 
+            -- Calculate is_completed: TRUE only if ALL modules in this state are completed
+            CASE 
+                WHEN (SELECT COUNT(*) FROM modules WHERE state_id = s.id) = 0 THEN 0
+                WHEN (SELECT COUNT(*) FROM modules WHERE state_id = s.id) = 
+                     (SELECT COUNT(*) FROM user_module_progress ump 
+                      JOIN modules m ON ump.module_id = m.id 
+                      WHERE m.state_id = s.id AND ump.user_id = ?1 AND ump.is_completed = 1)
+                THEN 1
+                ELSE 0
+            END as is_completed,
+            up.best_score, up.attempts, up.last_played_at,
             (SELECT COUNT(*) FROM lessons WHERE state_id = s.id) as lessons_count,
             (SELECT COUNT(*) FROM modules WHERE state_id = s.id) as modules_count,
             (SELECT MAX(current_level) FROM users WHERE id = ?1) >= s.unlock_level as is_unlocked
@@ -167,7 +178,7 @@ pub async fn get_user(
     let conn = db.connection.lock();
     
     conn.query_row(
-        "SELECT id, display_name, avatar_json, birth_year, education_level, total_xp, current_level, cowrie_shells, streak_days, last_login_at, created_at 
+        "SELECT id, display_name, avatar_json, birth_year, education_level, interests_json, total_xp, current_level, cowrie_shells, streak_days, last_login_at, created_at 
          FROM users WHERE id = ?1",
         [user_id],
         |row| {
@@ -175,18 +186,25 @@ pub async fn get_user(
             let avatar: AvatarConfig = serde_json::from_str(&avatar_json)
                 .unwrap_or_else(|_| AvatarConfig::default_avatar());
             
+            // Parse interests JSON
+            let interests_json: Option<String> = row.get(5)?;
+            let interests: Vec<String> = interests_json
+                .and_then(|json| serde_json::from_str(&json).ok())
+                .unwrap_or_default();
+            
             Ok(User {
                 id: row.get(0)?,
                 display_name: row.get(1)?,
                 avatar,
                 birth_year: row.get(3)?,
                 education_level: row.get(4)?,
-                total_xp: row.get(5)?,
-                current_level: row.get(6)?,
-                cowrie_shells: row.get(7)?,
-                streak_days: row.get(8)?,
-                last_login_at: row.get(9)?,
-                created_at: row.get(10)?,
+                interests,
+                total_xp: row.get(6)?,
+                current_level: row.get(7)?,
+                cowrie_shells: row.get(8)?,
+                streak_days: row.get(9)?,
+                last_login_at: row.get(10)?,
+                created_at: row.get(11)?,
             })
         },
     ).map_err(|e| DatabaseError::QueryError(format!("User not found: {}", e)))
@@ -200,6 +218,7 @@ pub async fn update_user_profile(
     display_name: String,
     birth_year: Option<i32>,
     education_level: Option<String>,
+    interests: Option<Vec<String>>,
 ) -> Result<User, DatabaseError> {
     // Validate education level if provided
     if let Some(ref level) = education_level {
@@ -216,12 +235,25 @@ pub async fn update_user_profile(
         }
     }
     
+    // Validate interests if provided
+    let valid_interests = ["history", "culture", "geography", "food", "music", "languages"];
+    if let Some(ref interest_list) = interests {
+        for interest in interest_list {
+            if !valid_interests.contains(&interest.as_str()) {
+                return Err(DatabaseError::QueryError(format!("Invalid interest: {}", interest)));
+            }
+        }
+    }
+    
+    // Convert interests to JSON
+    let interests_json: Option<String> = interests.map(|i| serde_json::to_string(&i).unwrap_or_else(|_| "[]".to_string()));
+    
     // Scope the connection lock
     {
         let conn = db.connection.lock();
         conn.execute(
-            "UPDATE users SET display_name = ?1, birth_year = ?2, education_level = ?3 WHERE id = ?4",
-            rusqlite::params![display_name, birth_year, education_level, user_id],
+            "UPDATE users SET display_name = ?1, birth_year = ?2, education_level = ?3, interests_json = ?4 WHERE id = ?5",
+            rusqlite::params![display_name, birth_year, education_level, interests_json, user_id],
         ).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
     }
     
@@ -304,36 +336,61 @@ pub async fn get_database_path(
     Ok(db.db_path.to_string_lossy().to_string())
 }
 
-// ============================================================
-// NEW MODULE-BASED CURRICULUM COMMANDS
-// ============================================================
-
-/// Get all modules for a specific state with user progress
+/// Get recommended modules based on user's interests
+/// Returns modules that match user's interests, sorted by relevance
 #[tauri::command]
-pub async fn get_modules_for_state(
+pub async fn get_recommended_modules(
     db: TauriState<'_, DatabaseState>,
-    state_id: String,
     user_id: i64,
+    limit: Option<i32>,
 ) -> Result<Vec<ModuleWithProgress>, DatabaseError> {
-    log::info!("get_modules_for_state called with state_id: {}, user_id: {}", state_id, user_id);
     let conn = db.connection.lock();
+    let limit = limit.unwrap_or(10);
     
+    // Get user's interests and education level
+    let (interests_json, education_level): (Option<String>, String) = conn.query_row(
+        "SELECT interests_json, COALESCE(education_level, 'all') FROM users WHERE id = ?1",
+        [user_id],
+        |row| Ok((row.get(0)?, row.get(1)?))
+    ).map_err(|e| DatabaseError::QueryError(format!("User not found: {}", e)))?;
+    
+    let user_interests: Vec<String> = interests_json
+        .and_then(|json| serde_json::from_str(&json).ok())
+        .unwrap_or_default();
+    
+    if user_interests.is_empty() {
+        // No interests set, return empty or popular modules
+        return Ok(vec![]);
+    }
+    
+    // Build a query that finds modules matching any of the user's interests
+    // and not yet completed
     let mut stmt = conn.prepare(
         r#"
         SELECT 
-            m.id, m.state_id, m.subject, m.title, m.description, m.required_level, m.total_xp, m.estimated_time, m.icon,
+            m.id, m.state_id, m.subject, m.title, m.description, m.required_level, m.total_xp, m.estimated_time, m.icon, m.education_level, m.interest_tags,
             mc.did_you_know, mc.fun_fact, mc.intro_text, mc.historical_note, mc.intro_image_url, mc.intro_video_url,
             ump.current_level_id, ump.is_completed, ump.stars, ump.total_xp_earned, ump.best_score, ump.attempts, ump.last_played_at,
-            (SELECT current_level FROM users WHERE id = ?2) >= m.required_level as is_unlocked
+            (SELECT current_level FROM users WHERE id = ?1) >= m.required_level as is_unlocked,
+            s.name as state_name
         FROM modules m
         LEFT JOIN module_context mc ON m.id = mc.module_id
-        LEFT JOIN user_module_progress ump ON m.id = ump.module_id AND ump.user_id = ?2
-        WHERE m.state_id = ?1
+        LEFT JOIN user_module_progress ump ON m.id = ump.module_id AND ump.user_id = ?1
+        LEFT JOIN states s ON m.state_id = s.id
+        WHERE m.interest_tags IS NOT NULL
+          AND (m.education_level = 'all' OR m.education_level = ?2 OR ?2 = 'all')
+          AND (ump.is_completed IS NULL OR ump.is_completed = 0)
         ORDER BY m.required_level, m.title
+        LIMIT ?3
         "#
     ).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
     
-    let modules = stmt.query_map([&state_id, &user_id.to_string()], |row| {
+    let modules = stmt.query_map(rusqlite::params![user_id, &education_level, limit], |row| {
+        let interest_tags_json: Option<String> = row.get(10)?;
+        let interest_tags: Vec<String> = interest_tags_json
+            .and_then(|json| serde_json::from_str(&json).ok())
+            .unwrap_or_default();
+        
         let module = Module {
             id: row.get(0)?,
             state_id: row.get(1)?,
@@ -344,33 +401,35 @@ pub async fn get_modules_for_state(
             total_xp: row.get(6)?,
             estimated_time: row.get(7)?,
             icon: row.get(8)?,
+            education_level: row.get::<_, Option<String>>(9)?.unwrap_or_else(|| "all".to_string()),
+            interest_tags,
         };
         
-        let context = if row.get::<_, Option<String>>(9)?.is_some() {
+        let context = if row.get::<_, Option<String>>(11)?.is_some() {
             Some(ModuleContext {
                 module_id: module.id.clone(),
-                did_you_know: row.get(9)?,
-                fun_fact: row.get(10)?,
-                intro_text: row.get(11)?,
-                historical_note: row.get(12)?,
-                intro_image_url: row.get(13)?,
-                intro_video_url: row.get(14)?,
+                did_you_know: row.get(11)?,
+                fun_fact: row.get(12)?,
+                intro_text: row.get(13)?,
+                historical_note: row.get(14)?,
+                intro_image_url: row.get(15)?,
+                intro_video_url: row.get(16)?,
             })
         } else {
             None
         };
         
-        let progress = if row.get::<_, Option<i32>>(16)?.is_some() {
+        let progress = if row.get::<_, Option<i32>>(18)?.is_some() {
             Some(UserModuleProgress {
                 user_id,
                 module_id: module.id.clone(),
-                current_level_id: row.get(15)?,
-                is_completed: row.get::<_, i32>(16)? != 0,
-                stars: row.get(17)?,
-                total_xp_earned: row.get(18)?,
-                best_score: row.get(19)?,
-                attempts: row.get(20)?,
-                last_played_at: row.get(21)?,
+                current_level_id: row.get(17)?,
+                is_completed: row.get::<_, i32>(18)? != 0,
+                stars: row.get(19)?,
+                total_xp_earned: row.get(20)?,
+                best_score: row.get(21)?,
+                attempts: row.get(22)?,
+                last_played_at: row.get(23)?,
             })
         } else {
             None
@@ -380,13 +439,141 @@ pub async fn get_modules_for_state(
             module,
             context,
             progress,
-            is_unlocked: row.get::<_, i32>(22)? != 0,
+            is_unlocked: row.get::<_, i32>(24)? != 0,
+        })
+    }).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    let all_modules: Vec<ModuleWithProgress> = modules.collect::<Result<Vec<_>, _>>()
+        .map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    // Filter and sort by interest match count (most relevant first)
+    let mut scored_modules: Vec<(ModuleWithProgress, usize)> = all_modules
+        .into_iter()
+        .map(|m| {
+            let match_count = m.module.interest_tags.iter()
+                .filter(|tag| user_interests.contains(tag))
+                .count();
+            (m, match_count)
+        })
+        .filter(|(_, count)| *count > 0)
+        .collect();
+    
+    // Sort by match count (descending), then by required_level (ascending)
+    scored_modules.sort_by(|a, b| {
+        b.1.cmp(&a.1)
+            .then_with(|| a.0.module.required_level.cmp(&b.0.module.required_level))
+    });
+    
+    let result: Vec<ModuleWithProgress> = scored_modules
+        .into_iter()
+        .take(limit as usize)
+        .map(|(m, _)| m)
+        .collect();
+    
+    log::info!("get_recommended_modules returning {} modules for user {}", result.len(), user_id);
+    Ok(result)
+}
+
+// ============================================================
+// NEW MODULE-BASED CURRICULUM COMMANDS
+// ============================================================
+
+/// Get all modules for a specific state with user progress
+/// Filters modules based on user's education level
+#[tauri::command]
+pub async fn get_modules_for_state(
+    db: TauriState<'_, DatabaseState>,
+    state_id: String,
+    user_id: i64,
+) -> Result<Vec<ModuleWithProgress>, DatabaseError> {
+    log::info!("get_modules_for_state called with state_id: {}, user_id: {}", state_id, user_id);
+    let conn = db.connection.lock();
+    
+    // Get user's education level
+    let user_education_level: String = conn.query_row(
+        "SELECT COALESCE(education_level, 'all') FROM users WHERE id = ?1",
+        [user_id],
+        |row| row.get(0)
+    ).unwrap_or_else(|_| "all".to_string());
+    
+    let mut stmt = conn.prepare(
+        r#"
+        SELECT 
+            m.id, m.state_id, m.subject, m.title, m.description, m.required_level, m.total_xp, m.estimated_time, m.icon, m.education_level, m.interest_tags,
+            mc.did_you_know, mc.fun_fact, mc.intro_text, mc.historical_note, mc.intro_image_url, mc.intro_video_url,
+            ump.current_level_id, ump.is_completed, ump.stars, ump.total_xp_earned, ump.best_score, ump.attempts, ump.last_played_at,
+            (SELECT current_level FROM users WHERE id = ?2) >= m.required_level as is_unlocked
+        FROM modules m
+        LEFT JOIN module_context mc ON m.id = mc.module_id
+        LEFT JOIN user_module_progress ump ON m.id = ump.module_id AND ump.user_id = ?2
+        WHERE m.state_id = ?1
+          AND (m.education_level = 'all' OR m.education_level = ?3 OR ?3 = 'all')
+        ORDER BY m.required_level, m.title
+        "#
+    ).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+    
+    let modules = stmt.query_map(rusqlite::params![&state_id, user_id, &user_education_level], |row| {
+        // Parse interest_tags JSON
+        let interest_tags_json: Option<String> = row.get(10)?;
+        let interest_tags: Vec<String> = interest_tags_json
+            .and_then(|json| serde_json::from_str(&json).ok())
+            .unwrap_or_default();
+        
+        let module = Module {
+            id: row.get(0)?,
+            state_id: row.get(1)?,
+            subject: row.get(2)?,
+            title: row.get(3)?,
+            description: row.get(4)?,
+            required_level: row.get(5)?,
+            total_xp: row.get(6)?,
+            estimated_time: row.get(7)?,
+            icon: row.get(8)?,
+            education_level: row.get::<_, Option<String>>(9)?.unwrap_or_else(|| "all".to_string()),
+            interest_tags,
+        };
+        
+        let context = if row.get::<_, Option<String>>(11)?.is_some() {
+            Some(ModuleContext {
+                module_id: module.id.clone(),
+                did_you_know: row.get(11)?,
+                fun_fact: row.get(12)?,
+                intro_text: row.get(13)?,
+                historical_note: row.get(14)?,
+                intro_image_url: row.get(15)?,
+                intro_video_url: row.get(16)?,
+            })
+        } else {
+            None
+        };
+        
+        let progress = if row.get::<_, Option<i32>>(18)?.is_some() {
+            Some(UserModuleProgress {
+                user_id,
+                module_id: module.id.clone(),
+                current_level_id: row.get(17)?,
+                is_completed: row.get::<_, i32>(18)? != 0,
+                stars: row.get(19)?,
+                total_xp_earned: row.get(20)?,
+                best_score: row.get(21)?,
+                attempts: row.get(22)?,
+                last_played_at: row.get(23)?,
+            })
+        } else {
+            None
+        };
+        
+        Ok(ModuleWithProgress {
+            module,
+            context,
+            progress,
+            is_unlocked: row.get::<_, i32>(24)? != 0,
         })
     }).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
     
     let result: Vec<ModuleWithProgress> = modules.collect::<Result<Vec<_>, _>>()
         .map_err(|e| DatabaseError::QueryError(e.to_string()))?;
-    log::info!("get_modules_for_state returning {} modules", result.len());
+    log::info!("get_modules_for_state returning {} modules for education_level: {}", result.len(), user_education_level);
     Ok(result)
 }
 
@@ -400,19 +587,28 @@ pub async fn get_module_content(
     
     // Get module
     let module: Module = conn.query_row(
-        "SELECT id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon FROM modules WHERE id = ?1",
+        "SELECT id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, COALESCE(education_level, 'all'), interest_tags FROM modules WHERE id = ?1",
         [&module_id],
-        |row| Ok(Module {
-            id: row.get(0)?,
-            state_id: row.get(1)?,
-            subject: row.get(2)?,
-            title: row.get(3)?,
-            description: row.get(4)?,
-            required_level: row.get(5)?,
-            total_xp: row.get(6)?,
-            estimated_time: row.get(7)?,
-            icon: row.get(8)?,
-        })
+        |row| {
+            let interest_tags_json: Option<String> = row.get(10)?;
+            let interest_tags: Vec<String> = interest_tags_json
+                .and_then(|json| serde_json::from_str(&json).ok())
+                .unwrap_or_default();
+            
+            Ok(Module {
+                id: row.get(0)?,
+                state_id: row.get(1)?,
+                subject: row.get(2)?,
+                title: row.get(3)?,
+                description: row.get(4)?,
+                required_level: row.get(5)?,
+                total_xp: row.get(6)?,
+                estimated_time: row.get(7)?,
+                icon: row.get(8)?,
+                education_level: row.get(9)?,
+                interest_tags,
+            })
+        }
     ).map_err(|e| DatabaseError::QueryError(format!("Module not found: {}", e)))?;
     
     // Get context
@@ -955,7 +1151,7 @@ pub async fn mark_encyclopedia_read(
     let conn = db.connection.lock();
     
     // Check if entry exists and get XP reward
-    let (tier, xp_reward): (i32, i32) = conn.query_row(
+    let (_tier, xp_reward): (i32, i32) = conn.query_row(
         "SELECT tier, xp_reward FROM encyclopedia_entries WHERE id = ?1",
         [&entry_id],
         |row| Ok((row.get(0)?, row.get(1)?))

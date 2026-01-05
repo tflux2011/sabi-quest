@@ -208,15 +208,15 @@ fn seed_items(conn: &Connection) -> Result<(), DatabaseError> {
 }
 
 fn seed_abuja_modules(conn: &Connection) -> Result<(), DatabaseError> {
-    // Module 1: The People's Court (Social Studies/Civic Education)
+    // Module 1: The People's Court (Social Studies/Civic Education) - All education levels (tutorial)
     conn.execute_batch(r#"
         -- =====================================================
         -- ABUJA MODULE 1: THE PEOPLE'S COURT (Social Studies)
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('abj_civics_001', 'ABJ', 'Social Studies', 'The People''s Court', 
                 'Learn how Nigeria''s government works! Pass bills through the National Assembly and understand your rights as a citizen.',
-                1, 500, 20, 'gavel');
+                1, 500, 20, 'gavel', 'all', '["history", "culture"]');
         
         -- Module Context (Encarta-style)
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
@@ -382,6 +382,531 @@ fn seed_abuja_modules(conn: &Connection) -> Result<(), DatabaseError> {
              'It has "Electoral" in its name.',
              5);
     "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+
+    // Module 2: Nigerian Geography (Basic Studies)
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- ABUJA MODULE 2: DISCOVER NIGERIA (Geography)
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
+        VALUES ('abj_geo_001', 'ABJ', 'Geography', 'Discover Nigeria: Our Land', 
+                'Explore the geography of Nigeria! Learn about our states, rivers, mountains, and why Abuja became our capital city.',
+                1, 450, 20, 'globe', 'all', '["geography"]');
+        
+        -- Module Context
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('abj_geo_001',
+                'Nigeria is about twice the size of California, USA, and is the most populous country in Africa with over 200 million people!',
+                'If Nigeria were a rectangle, it would be roughly 1,200 km from east to west and 1,050 km from north to south. That''s bigger than many European countries combined!',
+                'Welcome, young explorer! In this module, you will discover the amazing geography of Nigeria - from the sands of the Sahel in the north to the mangrove swamps of the Niger Delta. Learn about our rivers, mountains, and the 36 states that make up our great nation.',
+                'Abuja was chosen as Nigeria''s capital in 1976 because of its central location. Before that, Lagos was the capital, but it became too crowded!');
+        
+        -- Level 1: Nigeria on the Map
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_geo_001_lvl1', 'abj_geo_001', 'Nigeria on the Map', 'easy', 1, 100, 'badge_explorer');
+        
+        -- Level 1 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_g1_q1', 'abj_geo_001_lvl1', 
+             'On which continent is Nigeria located?',
+             'multiple_choice',
+             '[{"id":"a","text":"Asia"},{"id":"b","text":"Europe"},{"id":"c","text":"Africa"},{"id":"d","text":"South America"}]',
+             'c', 15,
+             'Nigeria is located in West Africa, on the African continent. Africa is the second-largest continent in the world.',
+             'Nigeria is known as the "Giant of Africa."',
+             1),
+            
+            ('abj_g1_q2', 'abj_geo_001_lvl1',
+             'How many states does Nigeria have (not counting the FCT)?',
+             'multiple_choice',
+             '[{"id":"a","text":"30 states"},{"id":"b","text":"36 states"},{"id":"c","text":"40 states"},{"id":"d","text":"24 states"}]',
+             'b', 15,
+             'Nigeria has 36 states plus the Federal Capital Territory (Abuja). The states are grouped into 6 geopolitical zones.',
+             'It''s more than 30 but less than 40.',
+             2),
+            
+            ('abj_g1_q3', 'abj_geo_001_lvl1',
+             'Which body of water borders Nigeria to the south?',
+             'multiple_choice',
+             '[{"id":"a","text":"Indian Ocean"},{"id":"b","text":"Mediterranean Sea"},{"id":"c","text":"Atlantic Ocean"},{"id":"d","text":"Red Sea"}]',
+             'c', 15,
+             'The Atlantic Ocean (specifically the Gulf of Guinea and Bight of Benin) borders Nigeria to the south. This is why states like Lagos and Rivers have coastal areas.',
+             'It''s the same ocean that borders the eastern coast of the Americas.',
+             3),
+            
+            ('abj_g1_q4', 'abj_geo_001_lvl1',
+             'Which country shares a border with Nigeria to the west?',
+             'multiple_choice',
+             '[{"id":"a","text":"Ghana"},{"id":"b","text":"Benin Republic"},{"id":"c","text":"Togo"},{"id":"d","text":"South Africa"}]',
+             'b', 15,
+             'Benin Republic borders Nigeria to the west. Nigeria also shares borders with Niger (north), Chad (northeast), and Cameroon (east).',
+             'It shares a similar name with a historic kingdom in Nigeria.',
+             4),
+            
+            ('abj_g1_q5', 'abj_geo_001_lvl1',
+             'True or False: Nigeria is the most populous country in Africa.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 10,
+             'True! Nigeria has over 200 million people, making it the most populous country in Africa and the 7th most populous in the world.',
+             NULL,
+             5);
+        
+        -- Level 2: Rivers and Natural Features
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_geo_001_lvl2', 'abj_geo_001', 'Rivers and Natural Wonders', 'medium', 2, 150, 'badge_naturalist');
+        
+        -- Level 2 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_g2_q1', 'abj_geo_001_lvl2',
+             'Nigeria gets its name from which river?',
+             'multiple_choice',
+             '[{"id":"a","text":"River Benue"},{"id":"b","text":"River Niger"},{"id":"c","text":"River Nile"},{"id":"d","text":"River Congo"}]',
+             'b', 20,
+             'Nigeria is named after the River Niger, which flows through the western part of the country. The name was suggested by Flora Shaw, a British journalist, in 1897.',
+             'The country and the river share almost the same spelling.',
+             1),
+            
+            ('abj_g2_q2', 'abj_geo_001_lvl2',
+             'Where do the Rivers Niger and Benue meet?',
+             'multiple_choice',
+             '[{"id":"a","text":"Lagos"},{"id":"b","text":"Abuja"},{"id":"c","text":"Lokoja"},{"id":"d","text":"Port Harcourt"}]',
+             'c', 20,
+             'The Rivers Niger and Benue meet at Lokoja in Kogi State. This confluence is a famous landmark and makes Lokoja a historically significant city.',
+             'This city is the capital of Kogi State.',
+             2),
+            
+            ('abj_g2_q3', 'abj_geo_001_lvl2',
+             'What is the name of the plateau that Abuja is built on?',
+             'multiple_choice',
+             '[{"id":"a","text":"Mambilla Plateau"},{"id":"b","text":"Jos Plateau"},{"id":"c","text":"Obudu Plateau"},{"id":"d","text":"Gwagwalada Plateau"}]',
+             'b', 20,
+             'Abuja is located on the Jos Plateau region (specifically the Abuja Plateau). The Jos Plateau in Plateau State is known for its cool climate and tin mining.',
+             'This plateau shares its name with a major city in north-central Nigeria.',
+             3),
+            
+            ('abj_g2_q4', 'abj_geo_001_lvl2',
+             'What is the Niger Delta famous for?',
+             'multiple_choice',
+             '[{"id":"a","text":"Gold mining"},{"id":"b","text":"Oil and gas production"},{"id":"c","text":"Diamond mining"},{"id":"d","text":"Coffee farming"}]',
+             'b', 20,
+             'The Niger Delta region is famous for oil and gas production. Nigeria is one of the largest oil producers in Africa, and most of the oil comes from states in the Niger Delta.',
+             'Nigeria''s main export comes from this region.',
+             4),
+            
+            ('abj_g2_q5', 'abj_geo_001_lvl2',
+             'Which Nigerian plateau is home to the Obudu Mountain Resort?',
+             'multiple_choice',
+             '[{"id":"a","text":"Jos Plateau"},{"id":"b","text":"Mambilla Plateau"},{"id":"c","text":"Obudu Plateau"},{"id":"d","text":"Biu Plateau"}]',
+             'c', 20,
+             'The Obudu Mountain Resort is located on the Obudu Plateau in Cross River State. It''s famous for its cable cars and cool mountain climate.',
+             'The resort and plateau share the same name.',
+             5);
+
+        -- Level 3: States and Regions
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_geo_001_lvl3', 'abj_geo_001', 'States and Geopolitical Zones', 'medium', 3, 150, NULL);
+        
+        -- Level 3 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_g3_q1', 'abj_geo_001_lvl3',
+             'How many geopolitical zones does Nigeria have?',
+             'multiple_choice',
+             '[{"id":"a","text":"4"},{"id":"b","text":"5"},{"id":"c","text":"6"},{"id":"d","text":"7"}]',
+             'c', 25,
+             'Nigeria has 6 geopolitical zones: North-Central, North-East, North-West, South-East, South-South, and South-West.',
+             'Each zone has 6 states on average.',
+             1),
+            
+            ('abj_g3_q2', 'abj_geo_001_lvl3',
+             'Which geopolitical zone is Abuja (FCT) located in?',
+             'multiple_choice',
+             '[{"id":"a","text":"North-West"},{"id":"b","text":"North-Central"},{"id":"c","text":"South-West"},{"id":"d","text":"North-East"}]',
+             'b', 20,
+             'Abuja (FCT) is in the North-Central geopolitical zone, also known as the Middle Belt. This zone includes states like Niger, Kogi, Kwara, Nasarawa, Benue, and Plateau.',
+             'It''s in the middle of the country, which matches its name.',
+             2),
+            
+            ('abj_g3_q3', 'abj_geo_001_lvl3',
+             'Which state is known as the "Centre of Excellence"?',
+             'multiple_choice',
+             '[{"id":"a","text":"Kano"},{"id":"b","text":"Rivers"},{"id":"c","text":"Lagos"},{"id":"d","text":"Kaduna"}]',
+             'c', 20,
+             'Lagos State is known as the "Centre of Excellence." It was Nigeria''s former capital and remains the economic hub of the country.',
+             'It''s Nigeria''s most populous city and commercial capital.',
+             3),
+            
+            ('abj_g3_q4', 'abj_geo_001_lvl3',
+             'True or False: Sokoto State is located in the South-South geopolitical zone.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'false', 15,
+             'False! Sokoto State is in the North-West geopolitical zone, not South-South. Sokoto is known as the seat of the Caliphate.',
+             NULL,
+             4),
+            
+            ('abj_g3_q5', 'abj_geo_001_lvl3',
+             'Which state in Nigeria has the largest land area?',
+             'multiple_choice',
+             '[{"id":"a","text":"Lagos"},{"id":"b","text":"Kano"},{"id":"c","text":"Niger"},{"id":"d","text":"Borno"}]',
+             'c', 25,
+             'Niger State is the largest state in Nigeria by land area, covering about 76,363 km². Despite being the largest, it''s not the most populous.',
+             'It shares its name with the river and a neighboring country.',
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+
+    // Module 3: Nigerian Languages and Culture
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- ABUJA MODULE 3: UNITY IN DIVERSITY (Languages & Culture)
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
+        VALUES ('abj_culture_001', 'ABJ', 'Cultural Studies', 'Unity in Diversity', 
+                'Learn about Nigeria''s rich cultural tapestry! Discover our major languages, ethnic groups, and what makes us "Unity in Diversity."',
+                1, 400, 18, 'users', 'all', '["culture", "languages"]');
+        
+        -- Module Context
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('abj_culture_001',
+                'Nigeria has over 500 different languages! The three major ones are Yoruba, Igbo, and Hausa, but English is the official language that unites us all.',
+                'The Nigerian coat of arms features two horses, an eagle, and a black shield with a white Y-shape representing the Rivers Niger and Benue. Our motto is "Unity and Faith, Peace and Progress!"',
+                'Welcome, young Nigerian! Our country is a beautiful mix of over 250 ethnic groups, each with their own language, food, clothing, and traditions. Yet, we are all united as one Nigeria. Let''s explore what makes us special!',
+                'Nigeria''s diverse ethnic groups have lived together for centuries. In 1914, the Northern and Southern Protectorates were merged to form what we now call Nigeria.');
+        
+        -- Level 1: Languages of Nigeria
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_culture_001_lvl1', 'abj_culture_001', 'Our Languages', 'easy', 1, 100, 'badge_linguist');
+        
+        -- Level 1 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_cu1_q1', 'abj_culture_001_lvl1', 
+             'What is the official language of Nigeria?',
+             'multiple_choice',
+             '[{"id":"a","text":"Yoruba"},{"id":"b","text":"Hausa"},{"id":"c","text":"English"},{"id":"d","text":"Igbo"}]',
+             'c', 15,
+             'English is Nigeria''s official language. It was inherited from British colonial rule and is used in government, schools, and business to unite our diverse nation.',
+             'It''s a language that came from our colonial history.',
+             1),
+            
+            ('abj_cu1_q2', 'abj_culture_001_lvl1',
+             'Which of these is NOT one of Nigeria''s three major indigenous languages?',
+             'multiple_choice',
+             '[{"id":"a","text":"Hausa"},{"id":"b","text":"Yoruba"},{"id":"c","text":"French"},{"id":"d","text":"Igbo"}]',
+             'c', 15,
+             'French is not a Nigerian language. Nigeria''s three major indigenous languages are Hausa (North), Yoruba (South-West), and Igbo (South-East).',
+             'One of these is a European language.',
+             2),
+            
+            ('abj_cu1_q3', 'abj_culture_001_lvl1',
+             '"Sannu" is a greeting in which Nigerian language?',
+             'multiple_choice',
+             '[{"id":"a","text":"Yoruba"},{"id":"b","text":"Igbo"},{"id":"c","text":"Hausa"},{"id":"d","text":"Ijaw"}]',
+             'c', 15,
+             '"Sannu" means "Hello" in Hausa. Hausa is widely spoken in Northern Nigeria and is one of the most spoken languages in Africa.',
+             'This language is dominant in the Northern region.',
+             3),
+            
+            ('abj_cu1_q4', 'abj_culture_001_lvl1',
+             '"Bawo ni?" means "How are you?" in which language?',
+             'multiple_choice',
+             '[{"id":"a","text":"Hausa"},{"id":"b","text":"Yoruba"},{"id":"c","text":"Igbo"},{"id":"d","text":"Tiv"}]',
+             'b', 15,
+             '"Bawo ni?" is Yoruba for "How are you?" The proper response is "Mo wa" (I am fine) or "Dada" (Fine).',
+             'This is the dominant language in the South-West.',
+             4),
+            
+            ('abj_cu1_q5', 'abj_culture_001_lvl1',
+             '"Kedu?" is a greeting in which language?',
+             'multiple_choice',
+             '[{"id":"a","text":"Hausa"},{"id":"b","text":"Yoruba"},{"id":"c","text":"Igbo"},{"id":"d","text":"Fulani"}]',
+             'c', 15,
+             '"Kedu?" means "How are you?" in Igbo. It can also mean "Hello." The response is often "Ọ dị mma" (It is well).',
+             'This language is dominant in the South-East region.',
+             5);
+        
+        -- Level 2: Ethnic Groups and Traditions
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_culture_001_lvl2', 'abj_culture_001', 'People and Traditions', 'medium', 2, 150, 'badge_cultural_ambassador');
+        
+        -- Level 2 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_cu2_q1', 'abj_culture_001_lvl2',
+             'What is a "Gele"?',
+             'multiple_choice',
+             '[{"id":"a","text":"A type of Nigerian soup"},{"id":"b","text":"A traditional headtie worn by women"},{"id":"c","text":"A musical instrument"},{"id":"d","text":"A type of dance"}]',
+             'b', 20,
+             'A Gele is a traditional headtie or head wrap worn by Nigerian women, especially at celebrations. Tying a Gele is an art form!',
+             'It''s something women wear on their heads at parties.',
+             1),
+            
+            ('abj_cu2_q2', 'abj_culture_001_lvl2',
+             'Which festival celebrates the New Yam harvest and is popular in Igbo culture?',
+             'multiple_choice',
+             '[{"id":"a","text":"Eyo Festival"},{"id":"b","text":"Durbar Festival"},{"id":"c","text":"New Yam Festival (Iri Ji)"},{"id":"d","text":"Argungu Fishing Festival"}]',
+             'c', 20,
+             'The New Yam Festival (Iri Ji or Iwa Ji) is an Igbo celebration of the yam harvest. Yam is so important it''s called the "King of Crops" in Igbo land!',
+             'The festival name mentions the crop being celebrated.',
+             2),
+            
+            ('abj_cu2_q3', 'abj_culture_001_lvl2',
+             'The "Agbada" is a traditional flowing robe worn mainly by:',
+             'multiple_choice',
+             '[{"id":"a","text":"Women only"},{"id":"b","text":"Men only"},{"id":"c","text":"Children only"},{"id":"d","text":"Men, especially for important occasions"}]',
+             'd', 20,
+             'Agbada is a wide-sleeved flowing robe traditionally worn by Yoruba, Hausa, and other Nigerian men for important occasions. It''s a symbol of dignity and wealth.',
+             'You often see important men wearing this at ceremonies.',
+             3),
+            
+            ('abj_cu2_q4', 'abj_culture_001_lvl2',
+             'True or False: The Tiv people are famous for their "Kwagh-hir" puppet theatre.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'True! The Tiv people of Benue State are known for Kwagh-hir, an elaborate puppet theatre that tells stories through carved figures, dance, and music.',
+             NULL,
+             4),
+            
+            ('abj_cu2_q5', 'abj_culture_001_lvl2',
+             'The Durbar Festival features colorful horse parades and is celebrated mainly in which region?',
+             'multiple_choice',
+             '[{"id":"a","text":"South-West"},{"id":"b","text":"South-East"},{"id":"c","text":"Northern Nigeria"},{"id":"d","text":"South-South"}]',
+             'c', 20,
+             'The Durbar Festival is celebrated in Northern Nigerian cities like Kano, Katsina, and Zaria. It features magnificent horse parades to honor the Emir after Eid prayers.',
+             'This festival is associated with Islamic celebrations in the north.',
+             5);
+
+        -- Level 3: National Symbols
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_culture_001_lvl3', 'abj_culture_001', 'Our National Symbols', 'medium', 3, 150, 'badge_patriot');
+        
+        -- Level 3 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_cu3_q1', 'abj_culture_001_lvl3',
+             'What do the green stripes on Nigeria''s flag represent?',
+             'multiple_choice',
+             '[{"id":"a","text":"The rivers"},{"id":"b","text":"Agriculture and natural wealth"},{"id":"c","text":"Peace"},{"id":"d","text":"The military"}]',
+             'b', 20,
+             'The green stripes represent Nigeria''s agriculture, natural wealth, and forests. The white stripe represents peace and unity.',
+             'Think about what color plants are.',
+             1),
+            
+            ('abj_cu3_q2', 'abj_culture_001_lvl3',
+             'What animal is at the top of Nigeria''s Coat of Arms?',
+             'multiple_choice',
+             '[{"id":"a","text":"Lion"},{"id":"b","text":"Horse"},{"id":"c","text":"Eagle"},{"id":"d","text":"Elephant"}]',
+             'c', 20,
+             'An eagle sits at the top of Nigeria''s Coat of Arms, representing strength. The two horses represent dignity, and the black shield with the white Y represents the Niger and Benue rivers.',
+             'It''s a bird that symbolizes strength and power.',
+             2),
+            
+            ('abj_cu3_q3', 'abj_culture_001_lvl3',
+             'What is Nigeria''s national motto?',
+             'multiple_choice',
+             '[{"id":"a","text":"One Nigeria, Great Nation"},{"id":"b","text":"Unity and Faith, Peace and Progress"},{"id":"c","text":"Together We Stand"},{"id":"d","text":"In God We Trust"}]',
+             'b', 25,
+             '"Unity and Faith, Peace and Progress" is Nigeria''s national motto. It appears on the Coat of Arms and represents our national aspirations.',
+             'It has four key values separated by commas.',
+             3),
+            
+            ('abj_cu3_q4', 'abj_culture_001_lvl3',
+             'Who wrote Nigeria''s current National Anthem "Arise, O Compatriots"?',
+             'multiple_choice',
+             '[{"id":"a","text":"Wole Soyinka"},{"id":"b","text":"Ben Odiase"},{"id":"c","text":"A collective of Nigerian authors"},{"id":"d","text":"Chinua Achebe"}]',
+             'c', 20,
+             'Nigeria''s current anthem was written collectively by John A. Ilechukwu, Eme Etim Akpan, B.A. Ogunnaike, Sota Omoigui, and P.O. Aderibigbe. The music was composed by Benedict Elide Odiase.',
+             'It wasn''t written by one person.',
+             4),
+            
+            ('abj_cu3_q5', 'abj_culture_001_lvl3',
+             'When did Nigeria gain independence from Britain?',
+             'multiple_choice',
+             '[{"id":"a","text":"October 1, 1960"},{"id":"b","text":"May 29, 1999"},{"id":"c","text":"January 1, 1970"},{"id":"d","text":"June 12, 1993"}]',
+             'a', 25,
+             'Nigeria gained independence on October 1, 1960. This date is celebrated annually as Independence Day. May 29 is Democracy Day, marking our return to civilian rule in 1999.',
+             'We celebrate this date every year in October.',
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
+
+    // Module 4: Nigerian History Basics
+    conn.execute_batch(r#"
+        -- =====================================================
+        -- ABUJA MODULE 4: ROOTS OF NIGERIA (Basic History)
+        -- =====================================================
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
+        VALUES ('abj_history_001', 'ABJ', 'History', 'Roots of Nigeria', 
+                'Travel back in time to discover how Nigeria came to be! Learn about ancient kingdoms, colonial history, and our path to independence.',
+                1, 500, 22, 'clock', 'all', '["history"]');
+        
+        -- Module Context
+        INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
+        VALUES ('abj_history_001',
+                'Before colonization, the area now called Nigeria was home to powerful kingdoms and empires like the Benin Empire, Oyo Empire, Sokoto Caliphate, and the Kanem-Bornu Empire!',
+                'The name "Nigeria" was coined by Flora Shaw in an 1897 newspaper article. She was the girlfriend (and later wife) of Lord Lugard, who merged Northern and Southern Nigeria in 1914.',
+                'Welcome, young historian! Nigeria has a rich history that stretches back thousands of years. From ancient kingdoms with bronze sculptures that amazed the world, to our struggle for independence and becoming Africa''s most populous nation - let''s explore it all!',
+                'The amalgamation of Northern and Southern Nigeria on January 1, 1914, by Lord Lugard created the country we know today as Nigeria.');
+        
+        -- Level 1: Ancient Kingdoms
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_history_001_lvl1', 'abj_history_001', 'Ancient Kingdoms', 'easy', 1, 100, 'badge_historian');
+        
+        -- Level 1 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_h1_q1', 'abj_history_001_lvl1', 
+             'The ancient Benin Kingdom was famous for creating beautiful artworks made of:',
+             'multiple_choice',
+             '[{"id":"a","text":"Gold"},{"id":"b","text":"Bronze and brass"},{"id":"c","text":"Silver"},{"id":"d","text":"Iron"}]',
+             'b', 15,
+             'The Benin Kingdom (in present-day Edo State) was world-famous for its bronze and brass sculptures. These "Benin Bronzes" showed amazing artistic skill and many are now in museums worldwide.',
+             'These metals can be mixed to make sculptures.',
+             1),
+            
+            ('abj_h1_q2', 'abj_history_001_lvl1',
+             'The Oyo Empire was one of the largest empires in which region of Nigeria?',
+             'multiple_choice',
+             '[{"id":"a","text":"North-East"},{"id":"b","text":"South-West"},{"id":"c","text":"South-East"},{"id":"d","text":"North-West"}]',
+             'b', 15,
+             'The Oyo Empire was a powerful Yoruba empire in present-day South-West Nigeria. At its peak, it was one of the largest West African states.',
+             'This is Yoruba land.',
+             2),
+            
+            ('abj_h1_q3', 'abj_history_001_lvl1',
+             'Which ancient Nigerian culture is famous for creating terracotta (clay) sculptures over 2,000 years ago?',
+             'multiple_choice',
+             '[{"id":"a","text":"Ife Culture"},{"id":"b","text":"Nok Culture"},{"id":"c","text":"Benin Culture"},{"id":"d","text":"Igbo-Ukwu Culture"}]',
+             'b', 20,
+             'The Nok Culture (from around present-day Plateau and Kaduna states) created terracotta sculptures as early as 500 BC. These are among the oldest sculptures in sub-Saharan Africa!',
+             'It shares its name with a place in Kaduna State.',
+             3),
+            
+            ('abj_h1_q4', 'abj_history_001_lvl1',
+             'True or False: The Sokoto Caliphate was founded by Usman dan Fodio in 1804.',
+             'true_false',
+             '[{"id":"true","text":"True"},{"id":"false","text":"False"}]',
+             'true', 15,
+             'True! Usman dan Fodio led a jihad (religious reform movement) that established the Sokoto Caliphate in 1804. It became one of the largest states in 19th century Africa.',
+             NULL,
+             4),
+            
+            ('abj_h1_q5', 'abj_history_001_lvl1',
+             'The Kanem-Bornu Empire was located in which part of present-day Nigeria?',
+             'multiple_choice',
+             '[{"id":"a","text":"South-West"},{"id":"b","text":"North-East"},{"id":"c","text":"South-South"},{"id":"d","text":"North-Central"}]',
+             'b', 15,
+             'The Kanem-Bornu Empire was centered around present-day Borno State in North-East Nigeria. It lasted for over 1,000 years!',
+             'Look at the name of the empire - it matches a current state.',
+             5);
+        
+        -- Level 2: Colonial Period
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_history_001_lvl2', 'abj_history_001', 'The Colonial Era', 'medium', 2, 150, 'badge_freedom_scholar');
+        
+        -- Level 2 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_h2_q1', 'abj_history_001_lvl2',
+             'Which European country colonized Nigeria?',
+             'multiple_choice',
+             '[{"id":"a","text":"France"},{"id":"b","text":"Portugal"},{"id":"c","text":"Britain"},{"id":"d","text":"Germany"}]',
+             'c', 20,
+             'Britain colonized Nigeria. The British first established trading posts on the coast, then gradually took control of the entire region.',
+             'This is why English is our official language.',
+             1),
+            
+            ('abj_h2_q2', 'abj_history_001_lvl2',
+             'In what year were the Northern and Southern Protectorates merged to form Nigeria?',
+             'multiple_choice',
+             '[{"id":"a","text":"1900"},{"id":"b","text":"1914"},{"id":"c","text":"1960"},{"id":"d","text":"1861"}]',
+             'b', 20,
+             'The Northern and Southern Protectorates were merged on January 1, 1914, by Lord Frederick Lugard. This amalgamation created the entity we now know as Nigeria.',
+             'It''s during World War I.',
+             2),
+            
+            ('abj_h2_q3', 'abj_history_001_lvl2',
+             'Which Nigerian city was the main port for the transatlantic slave trade?',
+             'multiple_choice',
+             '[{"id":"a","text":"Kano"},{"id":"b","text":"Calabar"},{"id":"c","text":"Abuja"},{"id":"d","text":"Sokoto"}]',
+             'b', 20,
+             'Calabar (in present-day Cross River State) was a major port for the transatlantic slave trade. The slave history museum in Calabar preserves this painful history.',
+             'It''s a coastal city in the South-South region.',
+             3),
+            
+            ('abj_h2_q4', 'abj_history_001_lvl2',
+             'The Royal Niger Company was a British trading company that helped colonize Nigeria. What did it mainly trade?',
+             'multiple_choice',
+             '[{"id":"a","text":"Gold and diamonds"},{"id":"b","text":"Palm oil and other products"},{"id":"c","text":"Rubber only"},{"id":"d","text":"Cattle"}]',
+             'b', 20,
+             'The Royal Niger Company mainly traded palm oil, palm kernels, and other agricultural products. Palm oil was called "red gold" because of its high value.',
+             'Think about what grows in the forests of Southern Nigeria.',
+             4),
+            
+            ('abj_h2_q5', 'abj_history_001_lvl2',
+             'Who was the first Nigerian to be appointed to the Legislative Council in 1923?',
+             'multiple_choice',
+             '[{"id":"a","text":"Nnamdi Azikiwe"},{"id":"b","text":"Herbert Macaulay"},{"id":"c","text":"Obafemi Awolowo"},{"id":"d","text":"Ahmadu Bello"}]',
+             'b', 25,
+             'Herbert Macaulay is considered the "Father of Nigerian Nationalism." He founded Nigeria''s first political party (NNDP) and fought for Nigerian representation in government.',
+             'He is called the "Father of Nigerian Nationalism."',
+             5);
+
+        -- Level 3: Independence and After
+        INSERT OR REPLACE INTO levels (id, module_id, title, difficulty, order_index, xp_reward, unlock_item_id)
+        VALUES ('abj_history_001_lvl3', 'abj_history_001', 'Independence and Beyond', 'medium', 3, 200, 'badge_independence');
+        
+        -- Level 3 Questions
+        INSERT OR REPLACE INTO questions (id, level_id, question_text, question_type, options_json, correct_answer, xp_reward, explanation, hint, order_index)
+        VALUES 
+            ('abj_h3_q1', 'abj_history_001_lvl3',
+             'Who was Nigeria''s first Prime Minister at independence?',
+             'multiple_choice',
+             '[{"id":"a","text":"Nnamdi Azikiwe"},{"id":"b","text":"Obafemi Awolowo"},{"id":"c","text":"Abubakar Tafawa Balewa"},{"id":"d","text":"Ahmadu Bello"}]',
+             'c', 25,
+             'Sir Abubakar Tafawa Balewa became Nigeria''s first Prime Minister on October 1, 1960. He was from Bauchi State.',
+             'His image was on the old Nigerian ₦5 note.',
+             1),
+            
+            ('abj_h3_q2', 'abj_history_001_lvl3',
+             'Who was Nigeria''s first President (ceremonial)?',
+             'multiple_choice',
+             '[{"id":"a","text":"Obafemi Awolowo"},{"id":"b","text":"Nnamdi Azikiwe"},{"id":"c","text":"Ahmadu Bello"},{"id":"d","text":"Shehu Shagari"}]',
+             'b', 25,
+             'Dr. Nnamdi Azikiwe became Nigeria''s first President (ceremonial role) in 1963 when Nigeria became a Republic. He was known as "Zik of Africa."',
+             'He is called "Zik of Africa."',
+             2),
+            
+            ('abj_h3_q3', 'abj_history_001_lvl3',
+             'The Nigerian Civil War (1967-1970) involved which region attempting to secede?',
+             'multiple_choice',
+             '[{"id":"a","text":"Western Region as Oduduwa"},{"id":"b","text":"Northern Region as Arewa"},{"id":"c","text":"Eastern Region as Biafra"},{"id":"d","text":"Mid-Western Region as Bendel"}]',
+             'c', 25,
+             'The Eastern Region, led by Colonel Odumegwu Ojukwu, declared independence as the Republic of Biafra in 1967. The civil war lasted until January 1970.',
+             'This word starts with "B" and was led by Ojukwu.',
+             3),
+            
+            ('abj_h3_q4', 'abj_history_001_lvl3',
+             'In what year did Nigeria become a Republic?',
+             'multiple_choice',
+             '[{"id":"a","text":"1960"},{"id":"b","text":"1963"},{"id":"c","text":"1979"},{"id":"d","text":"1999"}]',
+             'b', 20,
+             'Nigeria became a Republic on October 1, 1963, exactly three years after independence. The Queen of England was no longer the Head of State.',
+             'It was exactly 3 years after independence.',
+             4),
+            
+            ('abj_h3_q5', 'abj_history_001_lvl3',
+             'Which Nigerian head of state moved the capital from Lagos to Abuja?',
+             'multiple_choice',
+             '[{"id":"a","text":"Shehu Shagari"},{"id":"b","text":"Ibrahim Babangida"},{"id":"c","text":"Olusegun Obasanjo"},{"id":"d","text":"Sani Abacha"}]',
+             'b', 25,
+             'General Ibrahim Babangida officially moved the federal capital from Lagos to Abuja on December 12, 1991, though the plan was conceived under Murtala Muhammed in 1976.',
+             'He was known as "IBB" and ruled from 1985-1993.',
+             5);
+    "#).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
     
     Ok(())
 }
@@ -392,10 +917,10 @@ fn seed_lagos_modules(conn: &Connection) -> Result<(), DatabaseError> {
         -- =====================================================
         -- LAGOS MODULE 1: THE BALOGUN MARKET CHALLENGE (Mathematics)
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('lag_math_001', 'LAG', 'Mathematics', 'The Balogun Market Challenge', 
                 'Master the art of buying and selling in West Africa''s biggest market! Learn arithmetic, percentages, and financial calculations.',
-                2, 600, 25, 'calculator');
+                2, 600, 25, 'calculator', 'all', '["food"]');
         
         -- Module Context (Encarta-style)
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
@@ -564,10 +1089,10 @@ fn seed_lagos_modules(conn: &Connection) -> Result<(), DatabaseError> {
         -- =====================================================
         -- LAGOS MODULE 2: SILICON VALLEY OF NIGERIA (Logic/Coding)
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('lag_logic_001', 'LAG', 'Logic & Coding', 'Yaba Tech: Logic Puzzles', 
                 'Welcome to Nigeria''s tech hub! Train your brain with logic puzzles and algorithmic thinking.',
-                2, 450, 20, 'cpu');
+                2, 450, 20, 'cpu', 'all', '[]');
         
         -- Module Context
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
@@ -701,10 +1226,10 @@ fn seed_kano_modules(conn: &Connection) -> Result<(), DatabaseError> {
         -- =====================================================
         -- KANO MODULE 1: THE ANCIENT TRADE ROUTES (History/Commerce)
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('kan_history_001', 'KAN', 'History', 'The Ancient Trade Routes', 
                 'Discover the history of trans-Saharan trade that made Kano one of Africa''s greatest commercial cities!',
-                4, 550, 22, 'map');
+                4, 550, 22, 'map', 'all', '["history", "geography"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('kan_history_001',
@@ -775,10 +1300,10 @@ fn seed_edo_modules(conn: &Connection) -> Result<(), DatabaseError> {
         -- =====================================================
         -- EDO MODULE 1: THE BENIN BRONZES (Art/History)
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('edo_art_001', 'EDO', 'Art & History', 'The Benin Bronzes', 
                 'Explore the magnificent art of the Benin Kingdom - masterpieces that amazed the world!',
-                5, 600, 25, 'crown');
+                5, 600, 25, 'crown', 'all', '["history", "music", "culture"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('edo_art_001',
@@ -849,10 +1374,10 @@ fn seed_enugu_modules(conn: &Connection) -> Result<(), DatabaseError> {
         -- =====================================================
         -- ENUGU MODULE 1: THE COAL CITY (Science/Industry)
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('enu_science_001', 'ENU', 'Science', 'The Coal City Story', 
                 'Discover how coal shaped Nigeria''s industrial history and learn about energy and resources!',
-                5, 500, 20, 'flame');
+                5, 500, 20, 'flame', 'all', '["history"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('enu_science_001',
@@ -923,10 +1448,10 @@ fn seed_plateau_modules(conn: &Connection) -> Result<(), DatabaseError> {
         -- =====================================================
         -- PLATEAU MODULE 1: THE NOK CIVILIZATION (History)
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('pla_history_001', 'PLA', 'History', 'The Nok Civilization', 
                 'Journey back 2,500 years to discover Africa''s oldest known sculpture tradition!',
-                4, 550, 22, 'landmark');
+                4, 550, 22, 'landmark', 'all', '["history", "culture"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('pla_history_001',
@@ -997,10 +1522,10 @@ fn seed_bauchi_modules(conn: &Connection) -> Result<(), DatabaseError> {
         -- =====================================================
         -- BAUCHI MODULE 1: YANKARI WILDLIFE (Science/Nature)
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('bau_science_001', 'BAU', 'Science', 'Yankari Wildlife Safari', 
                 'Explore Nigeria''s premier wildlife reserve and learn about animal conservation!',
-                5, 550, 24, 'paw-print');
+                5, 550, 24, 'paw-print', 'all', '["geography"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('bau_science_001',
@@ -1071,10 +1596,10 @@ fn seed_anambra_modules(conn: &Connection) -> Result<(), DatabaseError> {
         -- =====================================================
         -- ANAMBRA MODULE 1: ONITSHA MARKET MATHEMATICS
         -- =====================================================
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('ana_math_001', 'ANA', 'Mathematics', 'Onitsha Market Mathematics', 
                 'Learn percentages and profit calculations at Africa''s largest market!',
-                5, 600, 25, 'calculator');
+                5, 600, 25, 'calculator', 'all', '["food"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('ana_math_001',
@@ -1142,10 +1667,10 @@ fn seed_anambra_modules(conn: &Connection) -> Result<(), DatabaseError> {
 // =====================================================
 fn seed_ogun_modules(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(r#"
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('ogu_english_001', 'OGU', 'English', 'Words of Wole Soyinka', 
                 'Learn the power of language from Africa''s first Nobel Laureate in Literature!',
-                4, 550, 22, 'book-open');
+                4, 550, 22, 'book-open', 'all', '["languages", "culture"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('ogu_english_001',
@@ -1213,10 +1738,10 @@ fn seed_ogun_modules(conn: &Connection) -> Result<(), DatabaseError> {
 // =====================================================
 fn seed_oyo_modules(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(r#"
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('oyo_history_001', 'OYO', 'History', 'The Oyo Empire', 
                 'Discover one of Africa''s most powerful empires that ruled for over 400 years!',
-                4, 600, 25, 'crown');
+                4, 600, 25, 'crown', 'all', '["history"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('oyo_history_001',
@@ -1284,10 +1809,10 @@ fn seed_oyo_modules(conn: &Connection) -> Result<(), DatabaseError> {
 // =====================================================
 fn seed_osun_modules(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(r#"
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('osu_culture_001', 'OSU', 'Culture', 'The Sacred Grove', 
                 'Explore the UNESCO World Heritage Site and learn about Yoruba spirituality!',
-                4, 500, 20, 'trees');
+                4, 500, 20, 'trees', 'all', '["culture", "history"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('osu_culture_001',
@@ -1355,10 +1880,10 @@ fn seed_osun_modules(conn: &Connection) -> Result<(), DatabaseError> {
 // =====================================================
 fn seed_rivers_modules(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(r#"
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('riv_science_001', 'RIV', 'Science', 'Oil and Energy', 
                 'Discover how oil powers Nigeria and learn about energy resources!',
-                5, 600, 25, 'fuel');
+                5, 600, 25, 'fuel', 'all', '["geography"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('riv_science_001',
@@ -1426,10 +1951,10 @@ fn seed_rivers_modules(conn: &Connection) -> Result<(), DatabaseError> {
 // =====================================================
 fn seed_crossriver_modules(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(r#"
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('crs_culture_001', 'CRS', 'Culture', 'Carnival and Conservation', 
                 'Experience Africa''s biggest street party and learn about rainforest conservation!',
-                6, 650, 28, 'party-popper');
+                6, 650, 28, 'party-popper', 'all', '["culture", "music", "geography"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('crs_culture_001',
@@ -1497,10 +2022,10 @@ fn seed_crossriver_modules(conn: &Connection) -> Result<(), DatabaseError> {
 // =====================================================
 fn seed_sokoto_modules(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(r#"
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('sok_history_001', 'SOK', 'History', 'The Sokoto Caliphate', 
                 'Learn about one of the largest empires in 19th century Africa!',
-                6, 600, 25, 'building-2');
+                6, 600, 25, 'building-2', 'all', '["history"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('sok_history_001',
@@ -1568,10 +2093,10 @@ fn seed_sokoto_modules(conn: &Connection) -> Result<(), DatabaseError> {
 // =====================================================
 fn seed_borno_modules(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(r#"
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('bor_history_001', 'BOR', 'History', 'The Kanem-Bornu Empire', 
                 'Discover Africa''s longest-lasting empire - over 1000 years of history!',
-                7, 700, 30, 'landmark');
+                7, 700, 30, 'landmark', 'all', '["history"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('bor_history_001',
@@ -1639,10 +2164,10 @@ fn seed_borno_modules(conn: &Connection) -> Result<(), DatabaseError> {
 // =====================================================
 fn seed_taraba_modules(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(r#"
-        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon)
+        INSERT OR REPLACE INTO modules (id, state_id, subject, title, description, required_level, total_xp, estimated_time, icon, education_level, interest_tags)
         VALUES ('tar_geography_001', 'TAR', 'Geography', 'The Mambilla Plateau', 
                 'Explore Nigeria''s highest point and learn about highland geography!',
-                6, 550, 22, 'mountain');
+                6, 550, 22, 'mountain', 'all', '["geography"]');
         
         INSERT OR REPLACE INTO module_context (module_id, did_you_know, fun_fact, intro_text, historical_note)
         VALUES ('tar_geography_001',
@@ -1706,16 +2231,16 @@ fn seed_taraba_modules(conn: &Connection) -> Result<(), DatabaseError> {
 }
 
 fn seed_default_user(conn: &Connection) -> Result<(), DatabaseError> {
-    // First create the user
+    // First create the user (only if they don't exist - preserve existing user data)
     conn.execute(
-        "INSERT OR REPLACE INTO users (id, display_name, avatar_json, total_xp, current_level, cowrie_shells, current_zone)
+        "INSERT OR IGNORE INTO users (id, display_name, avatar_json, total_xp, current_level, cowrie_shells, current_zone)
          VALUES (1, 'Student', '{\"skin\":\"tone_3\",\"head\":\"style_1\",\"top\":\"shirt_default\",\"accessory\":null}', 0, 1, 100, 'heritage')",
         []
     ).map_err(|e| DatabaseError::QueryError(format!("Failed to create user: {}", e)))?;
     
-    // Then set initial progress (Abuja unlocked for the default user)
+    // Then set initial progress (Abuja unlocked for the default user) - also ignore if exists
     conn.execute(
-        "INSERT OR REPLACE INTO user_progress (user_id, state_id, stars, is_completed, best_score, attempts)
+        "INSERT OR IGNORE INTO user_progress (user_id, state_id, stars, is_completed, best_score, attempts)
          VALUES (1, 'ABJ', 0, 0, 0, 0)",
         []
     ).map_err(|e| DatabaseError::QueryError(format!("Failed to create user progress: {}", e)))?;

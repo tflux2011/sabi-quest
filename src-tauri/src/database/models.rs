@@ -1,5 +1,10 @@
 // Data models for Project Nigeria
 // These structs represent database entities and are used for serialization
+//
+// Note: Some structs are defined for future features (story mode, achievements,
+// inventory system, etc.) and may not be actively used yet.
+
+#![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
 
@@ -56,6 +61,8 @@ pub struct Module {
     pub total_xp: i32,
     pub estimated_time: Option<i32>,
     pub icon: Option<String>,
+    pub education_level: String,     // "primary_lower", "primary_upper", "jss", "sss", "all"
+    pub interest_tags: Vec<String>,  // ["history", "culture", "geography", "food", "music", "languages"]
 }
 
 /// Rich "Encarta-style" context for a module
@@ -314,6 +321,7 @@ pub struct User {
     pub avatar: AvatarConfig,
     pub birth_year: Option<i32>,
     pub education_level: Option<String>,
+    pub interests: Vec<String>,    // Interest IDs: ["history", "culture", "geography", "food", "music", "languages"]
     pub total_xp: i64,
     pub current_level: i32,
     pub cowrie_shells: i64,

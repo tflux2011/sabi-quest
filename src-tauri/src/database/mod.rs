@@ -16,6 +16,7 @@ use thiserror::Error;
 
 /// Database-related errors with proper error handling
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum DatabaseError {
     #[error("Failed to initialize database: {0}")]
     InitializationError(String),

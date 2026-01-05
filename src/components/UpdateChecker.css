@@ -1,0 +1,267 @@
+/* UpdateChecker Component Styles */
+
+.update-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  background: linear-gradient(135deg, #00C896 0%, #00A078 100%);
+  color: white;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 200, 150, 0.4);
+}
+
+.update-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.update-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  flex-shrink: 0;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
+}
+
+.update-info {
+  flex: 1;
+}
+
+.update-info h3 {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.update-info p {
+  font-size: 0.85rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.update-info .update-notes {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.update-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.update-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.update-btn.primary {
+  background: white;
+  color: #00A078;
+}
+
+.update-btn.primary:hover {
+  background: #f0f0f0;
+}
+
+.update-btn.secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.update-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.update-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.update-close {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.update-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.download-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 200px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: white;
+  border-radius: 4px;
+}
+
+.download-progress span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: right;
+}
+
+.update-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(239, 71, 111, 0.9);
+  font-size: 0.8rem;
+}
+
+/* Check for Updates Button (for settings) */
+.check-update-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4D5382;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.check-update-btn:hover {
+  border-color: #00C896;
+  background: rgba(0, 200, 150, 0.05);
+}
+
+.check-update-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.check-update-btn .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  margin-left: 0.5rem;
+}
+
+.status-badge.success {
+  background: rgba(0, 200, 150, 0.1);
+  color: #00A078;
+}
+
+.status-badge.info {
+  background: rgba(255, 209, 102, 0.2);
+  color: #b8860b;
+}
+
+.status-badge.error {
+  background: rgba(239, 71, 111, 0.1);
+  color: #EF476F;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .update-banner-content {
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+  
+  .update-info {
+    flex: 1 1 100%;
+    order: 1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .update-icon {
+    order: 0;
+  }
+  
+  .update-actions {
+    order: 2;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .update-close {
+    position: static;
+    transform: none;
+    order: 3;
+    margin-left: auto;
+  }
+  
+  .download-progress {
+    min-width: 150px;
+  }
+}

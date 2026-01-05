@@ -1,0 +1,78 @@
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10000;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  transform-origin: center;
+}
+
+.confetti-square {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.confetti-circle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.confetti-triangle {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid;
+}
+
+.confetti-star {
+  font-size: 16px;
+  line-height: 1;
+  display: block;
+}
+
+.confetti-burst {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Sparkle animation for extra flair */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.5);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+.confetti-piece {
+  animation: shimmer 0.5s ease-in-out infinite;
+}

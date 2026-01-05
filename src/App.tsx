@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { motion, AnimatePresence } from 'framer-motion';
+import Confetti, { playCelebrationSound } from './components/Confetti';
+import UpdateChecker from './components/UpdateChecker';
 import { 
   AlertTriangle, 
   Lock, 
@@ -730,6 +732,9 @@ interface User {
   id: number;
   display_name: string;
   avatar: AvatarConfig;
+  birth_year: number | null;
+  education_level: string | null; // "primary_lower", "primary_upper", "jss", "sss"
+  interests: string[]; // ["history", "culture", "geography", "food", "music", "languages"]
   total_xp: number;
   current_level: number;
   cowrie_shells: number;
@@ -800,6 +805,8 @@ interface Module {
   total_xp: number;
   estimated_time: number | null;
   icon: string | null;
+  education_level: string; // "primary_lower", "primary_upper", "jss", "sss", "all"
+  interest_tags: string[]; // ["history", "culture", "geography", "food", "music", "languages"]
 }
 
 interface ModuleContext {
@@ -1127,6 +1134,7 @@ function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [answerFeedback, setAnswerFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [robotMessage, setRobotMessage] = useState<string | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Main view navigation (bottom nav)
   const [mainView, setMainView] = useState<MainView>('map');
@@ -1168,6 +1176,10 @@ function App() {
     rewards: { stars: number; xp: number; items: string[]; badges: string[] };
   } | null>(null);
 
+  // Recommended modules based on user interests
+  const [recommendedModules, setRecommendedModules] = useState<ModuleWithProgress[]>([]);
+  const [isLoadingRecommended, setIsLoadingRecommended] = useState(false);
+
   // Play sound helper
   const playSound = (soundName: keyof typeof sounds) => {
     if (soundEnabled) {
@@ -1201,19 +1213,20 @@ function App() {
     localStorage.setItem('hasSeenOnboarding', 'true');
     localStorage.setItem('userPreferences', JSON.stringify(userInfo));
     
-    // Update user profile in database with age and education level
+    // Update user profile in database with age, education level, and interests
     if (user) {
       try {
         // Calculate birth year from age
         const currentYear = new Date().getFullYear();
         const birthYear = userInfo.age ? currentYear - userInfo.age : null;
         
-        // Call the update_user_profile command
+        // Call the update_user_profile command with interests
         const updatedUser = await invoke<User>('update_user_profile', {
           userId: user.id,
           displayName: userInfo.displayName,
           birthYear: birthYear,
           educationLevel: userInfo.educationLevel || null,
+          interests: userInfo.interests.length > 0 ? userInfo.interests : null,
         });
         
         setUser(updatedUser);
@@ -1302,6 +1315,29 @@ function App() {
       setIsQuestsLoading(false);
     }
   }, []);
+
+  // Load recommended modules based on user interests
+  const loadRecommendedModules = useCallback(async () => {
+    setIsLoadingRecommended(true);
+    try {
+      const modules = await invoke<ModuleWithProgress[]>('get_recommended_modules', { 
+        userId: 1, 
+        limit: 6 
+      });
+      setRecommendedModules(modules);
+    } catch (err) {
+      console.error('Error loading recommended modules:', err);
+    } finally {
+      setIsLoadingRecommended(false);
+    }
+  }, []);
+
+  // Load recommended modules when user data is available
+  useEffect(() => {
+    if (user && currentScreen === 'main') {
+      loadRecommendedModules();
+    }
+  }, [user, currentScreen, loadRecommendedModules]);
 
   // Load artifacts/museum
   const loadArtifacts = useCallback(async (category?: string) => {
@@ -1552,9 +1588,14 @@ function App() {
         
         console.log('Level result:', result);
         
-        // Play level complete sound
+        // Play celebration sound and show confetti if passed
         if (soundEnabled) {
-          sounds.levelComplete();
+          if (result.passed) {
+            playCelebrationSound();
+            setShowCelebration(true);
+          } else {
+            sounds.levelComplete();
+          }
         }
         
         setLevelResult(result);
@@ -1589,6 +1630,7 @@ function App() {
     setActiveQuiz(null);
     setQuizCompleted(false);
     setLevelResult(null);
+    setShowCelebration(false);
     document.body.classList.remove('modal-open');
     
     // Refresh module content to show updated progress
@@ -1919,6 +1961,9 @@ function App() {
 
   return (
     <div className="app">
+      {/* Update Checker - Shows banner when update is available */}
+      <UpdateChecker />
+
       {/* Immersive Background */}
       <div className="app-background">
         <div className="bg-gradient" />
@@ -2082,6 +2127,122 @@ function App() {
             </motion.button>
           </div>
         </motion.section>
+
+        {/* Recommended For You Section */}
+        {recommendedModules.length > 0 && (
+          <motion.section 
+            className="recommended-section"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="recommended-header">
+              <div className="recommended-title">
+                <Sparkles size={20} className="sparkle-icon" />
+                <h2>Recommended for You</h2>
+              </div>
+              <p className="recommended-subtitle">
+                Based on your interests: {user?.interests?.map(i => 
+                  i.charAt(0).toUpperCase() + i.slice(1)
+                ).join(', ') || 'All topics'}
+              </p>
+            </div>
+            
+            <div className="recommended-grid">
+              {recommendedModules.map((module, index) => {
+                // Get matching interest tags
+                const matchingTags = (module.module.interest_tags || []).filter(
+                  tag => user?.interests?.includes(tag)
+                );
+                
+                // Interest tag icons
+                const tagIcons: Record<string, React.ReactNode> = {
+                  history: <BookMarked size={12} />,
+                  culture: <Theater size={12} />,
+                  geography: <Globe size={12} />,
+                  food: <UtensilsCrossed size={12} />,
+                  music: <Music size={12} />,
+                  languages: <MessageCircle size={12} />,
+                };
+                
+                return (
+                  <motion.div
+                    key={module.module.id}
+                    className={`recommended-card ${module.progress?.is_completed ? 'completed' : ''}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1, duration: 0.3 }}
+                    whileHover={{ scale: 1.03, y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      // Find the state this module belongs to
+                      const state = states.find(s => s.state.id === module.module.state_id);
+                      if (state && state.is_unlocked) {
+                        playSound('click');
+                        handleExploreState(state);
+                      }
+                    }}
+                  >
+                    <div className="recommended-card-header">
+                      <span className="recommended-state-name">
+                        {states.find(s => s.state.id === module.module.state_id)?.state.name || 'Unknown State'}
+                      </span>
+                      {module.progress?.is_completed && (
+                        <CheckCircle size={14} className="completed-check" />
+                      )}
+                    </div>
+                    
+                    <h3 className="recommended-module-title">{module.module.title}</h3>
+                    
+                    <div className="recommended-tags">
+                      {matchingTags.length > 0 ? (
+                        matchingTags.map(tag => (
+                          <span key={tag} className="interest-tag matched">
+                            {tagIcons[tag] || <Star size={12} />}
+                            {tag}
+                          </span>
+                        ))
+                      ) : (
+                        (module.module.interest_tags || []).slice(0, 2).map(tag => (
+                          <span key={tag} className="interest-tag">
+                            {tagIcons[tag] || <Star size={12} />}
+                            {tag}
+                          </span>
+                        ))
+                      )}
+                    </div>
+                    
+                    <div className="recommended-meta">
+                      <span className="xp-reward">
+                        <Zap size={12} />
+                        {module.module.total_xp} XP
+                      </span>
+                    </div>
+                    
+                    {!states.find(s => s.state.id === module.module.state_id)?.is_unlocked && (
+                      <div className="recommended-locked-overlay">
+                        <Lock size={16} />
+                        <span>State Locked</span>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+            
+            {isLoadingRecommended && (
+              <div className="recommended-loading">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles size={24} />
+                </motion.div>
+                <span>Finding modules for you...</span>
+              </div>
+            )}
+          </motion.section>
+        )}
 
         {/* States Grid */}
         <section className="states-section">
@@ -3403,6 +3564,14 @@ function App() {
                   backgroundColor: '#2D5016',
                 }}
               >
+                {/* Confetti celebration for passed levels */}
+                <Confetti 
+                  isActive={showCelebration && levelResult?.passed === true} 
+                  duration={4000}
+                  pieceCount={150}
+                  onComplete={() => setShowCelebration(false)}
+                />
+                
                 <motion.div 
                   className="complete-celebration"
                   animate={{ rotate: [0, 5, -5, 0] }}

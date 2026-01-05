@@ -36,3 +36,5 @@ parking_lot = "0.12"
 
 # For proper error handling
 thiserror = "1.0"
+tauri-plugin-updater = "2.9.0"
+tauri-plugin-process = "2.3.1"
