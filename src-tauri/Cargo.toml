@@ -1,6 +1,6 @@
 [package]
 name = "project-nigeria"
-version = "0.1.0"
+version = "0.1.1"
 description = "An offline-first educational RPG for Nigerian students"
 authors = ["Project Nigeria Team"]
 license = "MIT"
