@@ -1,10 +1,10 @@
 [package]
-name = "project-nigeria"
+name = "sabi-quest"
 version = "0.1.2"
 description = "An offline-first educational RPG for Nigerian students"
-authors = ["Project Nigeria Team"]
+authors = ["Sabi Quest Team"]
 license = "MIT"
-repository = ""
+repository = "https://github.com/tflux2011/sabi-quest"
 edition = "2021"
 rust-version = "1.77.2"
 
