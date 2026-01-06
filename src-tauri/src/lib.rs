@@ -39,6 +39,8 @@ pub fn run() {
             database::get_all_states,
             database::get_lesson_content,
             database::get_user,
+            database::get_adventurer_bonuses,
+            database::calculate_xp_with_bonus,
             database::update_progress,
             database::get_database_path,
             database::update_user_profile,

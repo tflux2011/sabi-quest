@@ -178,7 +178,7 @@ pub async fn get_user(
     let conn = db.connection.lock();
     
     conn.query_row(
-        "SELECT id, display_name, avatar_json, birth_year, education_level, interests_json, total_xp, current_level, cowrie_shells, streak_days, last_login_at, created_at 
+        "SELECT id, display_name, avatar_json, adventurer_type, birth_year, education_level, interests_json, total_xp, current_level, cowrie_shells, streak_days, last_login_at, created_at 
          FROM users WHERE id = ?1",
         [user_id],
         |row| {
@@ -186,8 +186,14 @@ pub async fn get_user(
             let avatar: AvatarConfig = serde_json::from_str(&avatar_json)
                 .unwrap_or_else(|_| AvatarConfig::default_avatar());
             
+            // Parse adventurer type
+            let adventurer_type_str: Option<String> = row.get(3)?;
+            let adventurer_type = adventurer_type_str
+                .map(|s| AdventurerType::from_str(&s))
+                .unwrap_or_default();
+            
             // Parse interests JSON
-            let interests_json: Option<String> = row.get(5)?;
+            let interests_json: Option<String> = row.get(6)?;
             let interests: Vec<String> = interests_json
                 .and_then(|json| serde_json::from_str(&json).ok())
                 .unwrap_or_default();
@@ -196,18 +202,95 @@ pub async fn get_user(
                 id: row.get(0)?,
                 display_name: row.get(1)?,
                 avatar,
-                birth_year: row.get(3)?,
-                education_level: row.get(4)?,
+                adventurer_type,
+                birth_year: row.get(4)?,
+                education_level: row.get(5)?,
                 interests,
-                total_xp: row.get(6)?,
-                current_level: row.get(7)?,
-                cowrie_shells: row.get(8)?,
-                streak_days: row.get(9)?,
-                last_login_at: row.get(10)?,
-                created_at: row.get(11)?,
+                total_xp: row.get(7)?,
+                current_level: row.get(8)?,
+                cowrie_shells: row.get(9)?,
+                streak_days: row.get(10)?,
+                last_login_at: row.get(11)?,
+                created_at: row.get(12)?,
             })
         },
     ).map_err(|e| DatabaseError::QueryError(format!("User not found: {}", e)))
+}
+
+/// Adventurer bonuses response
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AdventurerBonuses {
+    pub adventurer_type: String,
+    pub display_name: String,
+    pub bonus_description: String,
+    pub xp_bonus_subjects: Vec<String>,
+    pub xp_bonus_multiplier: f64,
+    pub cowrie_bonus_multiplier: f64,
+    pub quiz_timer_bonus_seconds: i32,
+    pub hint_cost_multiplier: f64,
+    pub streak_protection_days: i32,
+    pub codex_xp_bonus_multiplier: f64,
+}
+
+/// Get adventurer type bonuses for a user
+#[tauri::command]
+pub async fn get_adventurer_bonuses(
+    db: TauriState<'_, DatabaseState>,
+    user_id: i64,
+) -> Result<AdventurerBonuses, DatabaseError> {
+    let conn = db.connection.lock();
+    
+    let adventurer_type_str: String = conn.query_row(
+        "SELECT COALESCE(adventurer_type, 'explorer') FROM users WHERE id = ?1",
+        [user_id],
+        |row| row.get(0),
+    ).map_err(|e| DatabaseError::QueryError(format!("User not found: {}", e)))?;
+    
+    let adventurer_type = AdventurerType::from_str(&adventurer_type_str);
+    
+    // Determine which subjects get bonuses
+    let xp_bonus_subjects = match adventurer_type {
+        AdventurerType::Explorer => vec!["Geography".to_string(), "Maps".to_string()],
+        AdventurerType::Scholar => vec!["History".to_string(), "Civics".to_string()],
+        AdventurerType::Artist => vec!["Culture".to_string(), "Arts".to_string(), "Music".to_string()],
+        AdventurerType::Storyteller => vec!["Literature".to_string(), "Languages".to_string()],
+        _ => vec![],
+    };
+    
+    Ok(AdventurerBonuses {
+        adventurer_type: adventurer_type_str,
+        display_name: adventurer_type.display_name().to_string(),
+        bonus_description: adventurer_type.bonus_description().to_string(),
+        xp_bonus_subjects,
+        xp_bonus_multiplier: 1.10, // 10% bonus for relevant subjects
+        cowrie_bonus_multiplier: adventurer_type.cowrie_bonus(),
+        quiz_timer_bonus_seconds: adventurer_type.quiz_timer_bonus(),
+        hint_cost_multiplier: adventurer_type.hint_cost_multiplier(),
+        streak_protection_days: adventurer_type.streak_protection_days(),
+        codex_xp_bonus_multiplier: adventurer_type.codex_xp_bonus(),
+    })
+}
+
+/// Calculate XP with adventurer bonuses applied
+#[tauri::command]
+pub async fn calculate_xp_with_bonus(
+    db: TauriState<'_, DatabaseState>,
+    user_id: i64,
+    base_xp: i64,
+    subject: String,
+) -> Result<i64, DatabaseError> {
+    let conn = db.connection.lock();
+    
+    let adventurer_type_str: String = conn.query_row(
+        "SELECT COALESCE(adventurer_type, 'explorer') FROM users WHERE id = ?1",
+        [user_id],
+        |row| row.get(0),
+    ).map_err(|e| DatabaseError::QueryError(format!("User not found: {}", e)))?;
+    
+    let adventurer_type = AdventurerType::from_str(&adventurer_type_str);
+    let multiplier = adventurer_type.xp_bonus_for_subject(&subject);
+    
+    Ok((base_xp as f64 * multiplier) as i64)
 }
 
 /// Update user profile with onboarding information
@@ -216,10 +299,19 @@ pub async fn update_user_profile(
     db: TauriState<'_, DatabaseState>,
     user_id: i64,
     display_name: String,
+    adventurer_type: Option<String>,
     birth_year: Option<i32>,
     education_level: Option<String>,
     interests: Option<Vec<String>>,
 ) -> Result<User, DatabaseError> {
+    // Validate adventurer type if provided
+    let valid_adventurer_types = ["explorer", "scholar", "warrior", "artist", "storyteller", "chief"];
+    if let Some(ref atype) = adventurer_type {
+        if !valid_adventurer_types.contains(&atype.to_lowercase().as_str()) {
+            return Err(DatabaseError::QueryError(format!("Invalid adventurer type: {}", atype)));
+        }
+    }
+    
     // Validate education level if provided
     if let Some(ref level) = education_level {
         let valid_levels = ["primary_lower", "primary_upper", "jss", "sss"];
@@ -252,8 +344,8 @@ pub async fn update_user_profile(
     {
         let conn = db.connection.lock();
         conn.execute(
-            "UPDATE users SET display_name = ?1, birth_year = ?2, education_level = ?3, interests_json = ?4 WHERE id = ?5",
-            rusqlite::params![display_name, birth_year, education_level, interests_json, user_id],
+            "UPDATE users SET display_name = ?1, adventurer_type = ?2, birth_year = ?3, education_level = ?4, interests_json = ?5 WHERE id = ?6",
+            rusqlite::params![display_name, adventurer_type, birth_year, education_level, interests_json, user_id],
         ).map_err(|e| DatabaseError::QueryError(e.to_string()))?;
     }
     

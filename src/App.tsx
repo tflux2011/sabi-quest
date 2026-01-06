@@ -255,6 +255,15 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (userInfo: UserInfo) => 
     }
   };
 
+  // Back navigation handler
+  const handleBack = () => {
+    const stepOrder: OnboardingStep[] = ['name', 'age', 'education', 'avatar', 'interests'];
+    const currentIndex = stepOrder.indexOf(step);
+    if (currentIndex > 0) {
+      setStep(stepOrder[currentIndex - 1]);
+    }
+  };
+
   // Progress calculation: 5 steps now (name, age, education, avatar, interests)
   const progressMap: Record<OnboardingStep, number> = {
     'name': 20,
@@ -376,6 +385,15 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (userInfo: UserInfo) => 
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.4 }}
               >
+                <motion.button
+                  className="onboarding-back-btn"
+                  onClick={handleBack}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Go back"
+                >
+                  <ChevronLeft size={20} />
+                </motion.button>
                 <span className="step-number">2 →</span>
                 <h2 className="typeform-question">
                   Hey {userInfo.displayName}! How old are you? 🎂
@@ -411,6 +429,15 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (userInfo: UserInfo) => 
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.4 }}
               >
+                <motion.button
+                  className="onboarding-back-btn"
+                  onClick={handleBack}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Go back"
+                >
+                  <ChevronLeft size={20} />
+                </motion.button>
                 <span className="step-number">3 →</span>
                 <h2 className="typeform-question">
                   What class are you in? 📚
@@ -460,6 +487,15 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (userInfo: UserInfo) => 
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.4 }}
               >
+                <motion.button
+                  className="onboarding-back-btn"
+                  onClick={handleBack}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Go back"
+                >
+                  <ChevronLeft size={20} />
+                </motion.button>
                 <span className="step-number">4 →</span>
                 <h2 className="typeform-question">
                   Awesome! Choose your adventurer type ⚔️
@@ -499,6 +535,15 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (userInfo: UserInfo) => 
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.4 }}
               >
+                <motion.button
+                  className="onboarding-back-btn"
+                  onClick={handleBack}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Go back"
+                >
+                  <ChevronLeft size={20} />
+                </motion.button>
                 <span className="step-number">5 →</span>
                 <h2 className="typeform-question">What interests you most?</h2>
                 <p className="typeform-hint">Select all that apply (at least one)</p>

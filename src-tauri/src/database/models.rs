@@ -313,12 +313,145 @@ impl EducationLevel {
     }
 }
 
+// ============================================
+// ADVENTURER TYPE SYSTEM
+// ============================================
+
+/// Adventurer types that provide gameplay bonuses
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum AdventurerType {
+    #[default]
+    Explorer,    // +10% XP from Geography, faster map unlocks
+    Scholar,     // +10% XP from History, reduced hint costs
+    Warrior,     // Extended streak bonuses, +5 seconds on quiz timer
+    Artist,      // +10% XP from Culture/Arts, bonus customization options
+    Storyteller, // +10% XP from Codex reading, dialogue bonuses
+    Chief,       // +10% cowrie shell rewards, leadership achievements
+}
+
+impl AdventurerType {
+    /// Returns the XP bonus multiplier for a given subject
+    pub fn xp_bonus_for_subject(&self, subject: &str) -> f64 {
+        let subject_lower = subject.to_lowercase();
+        match self {
+            AdventurerType::Explorer => {
+                if subject_lower.contains("geography") || subject_lower.contains("map") {
+                    1.10 // 10% bonus
+                } else {
+                    1.0
+                }
+            }
+            AdventurerType::Scholar => {
+                if subject_lower.contains("history") || subject_lower.contains("civics") {
+                    1.10
+                } else {
+                    1.0
+                }
+            }
+            AdventurerType::Artist => {
+                if subject_lower.contains("culture") || subject_lower.contains("art") || subject_lower.contains("music") {
+                    1.10
+                } else {
+                    1.0
+                }
+            }
+            AdventurerType::Storyteller => {
+                if subject_lower.contains("literature") || subject_lower.contains("language") || subject_lower.contains("story") {
+                    1.10
+                } else {
+                    1.0
+                }
+            }
+            _ => 1.0, // Warrior and Chief don't have subject-specific XP bonuses
+        }
+    }
+
+    /// Returns the cowrie shell bonus multiplier
+    pub fn cowrie_bonus(&self) -> f64 {
+        match self {
+            AdventurerType::Chief => 1.10, // 10% more cowrie shells
+            _ => 1.0,
+        }
+    }
+
+    /// Returns bonus seconds for quiz timer
+    pub fn quiz_timer_bonus(&self) -> i32 {
+        match self {
+            AdventurerType::Warrior => 5, // +5 seconds
+            _ => 0,
+        }
+    }
+
+    /// Returns hint cost reduction (1.0 = full cost, 0.5 = half cost)
+    pub fn hint_cost_multiplier(&self) -> f64 {
+        match self {
+            AdventurerType::Scholar => 0.5, // 50% off hints
+            _ => 1.0,
+        }
+    }
+
+    /// Returns streak protection bonus (extra days before streak breaks)
+    pub fn streak_protection_days(&self) -> i32 {
+        match self {
+            AdventurerType::Warrior => 1, // 1 day grace period
+            _ => 0,
+        }
+    }
+
+    /// Returns XP bonus for reading Codex/Encyclopedia entries
+    pub fn codex_xp_bonus(&self) -> f64 {
+        match self {
+            AdventurerType::Storyteller => 1.25, // 25% bonus XP from reading
+            _ => 1.0,
+        }
+    }
+
+    /// Get display name for the adventurer type
+    pub fn display_name(&self) -> &str {
+        match self {
+            AdventurerType::Explorer => "Explorer",
+            AdventurerType::Scholar => "Scholar",
+            AdventurerType::Warrior => "Warrior",
+            AdventurerType::Artist => "Artist",
+            AdventurerType::Storyteller => "Storyteller",
+            AdventurerType::Chief => "Chief",
+        }
+    }
+
+    /// Get description of the adventurer type's bonuses
+    pub fn bonus_description(&self) -> &str {
+        match self {
+            AdventurerType::Explorer => "+10% XP from Geography modules",
+            AdventurerType::Scholar => "+10% XP from History, 50% off hints",
+            AdventurerType::Warrior => "+5s quiz timer, streak protection",
+            AdventurerType::Artist => "+10% XP from Culture & Arts",
+            AdventurerType::Storyteller => "+25% XP from Codex reading",
+            AdventurerType::Chief => "+10% cowrie shell rewards",
+        }
+    }
+
+    /// Parse from string
+    pub fn from_str(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "explorer" => AdventurerType::Explorer,
+            "scholar" => AdventurerType::Scholar,
+            "warrior" => AdventurerType::Warrior,
+            "artist" => AdventurerType::Artist,
+            "storyteller" => AdventurerType::Storyteller,
+            "chief" => AdventurerType::Chief,
+            _ => AdventurerType::Explorer, // Default
+        }
+    }
+}
+
 /// User profile with avatar customization
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
     pub id: i64,
     pub display_name: String,
     pub avatar: AvatarConfig,
+    pub adventurer_type: AdventurerType,
     pub birth_year: Option<i32>,
     pub education_level: Option<String>,
     pub interests: Vec<String>,    // Interest IDs: ["history", "culture", "geography", "food", "music", "languages"]

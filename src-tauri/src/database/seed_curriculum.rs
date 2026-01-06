@@ -30,6 +30,12 @@ pub fn seed_curriculum(conn: &Connection) -> Result<(), DatabaseError> {
     seed_sokoto_modules(conn)?;
     seed_borno_modules(conn)?;
     seed_taraba_modules(conn)?;
+    seed_kano_modules(conn)?;
+    seed_edo_modules(conn)?;
+    seed_enugu_modules(conn)?;
+    seed_plateau_modules(conn)?;
+    seed_bauchi_modules(conn)?;
+    seed_anambra_modules(conn)?;
     
     // Seed The Sabi Codex encyclopedia entries
     seed_encyclopedia(conn)?;

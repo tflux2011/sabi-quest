@@ -160,6 +160,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     display_name TEXT NOT NULL,
     avatar_json TEXT,              -- JSON object with avatar customization
+    adventurer_type TEXT DEFAULT 'explorer', -- "explorer", "scholar", "warrior", "artist", "storyteller", "chief"
     birth_year INTEGER,            -- User's birth year for age-appropriate content
     education_level TEXT,          -- "primary_lower", "primary_upper", "jss", "sss"
     interests_json TEXT,           -- JSON array of interest IDs: ["history", "culture", "geography", "food", "music", "languages"]
@@ -477,7 +478,33 @@ pub fn create_tables(conn: &Connection) -> Result<(), DatabaseError> {
     conn.execute_batch(SCHEMA_SQL)
         .map_err(|e| DatabaseError::InitializationError(format!("Failed to create tables: {}", e)))?;
     
+    // Run migrations for existing databases
+    run_migrations(conn)?;
+    
     log::info!("Database schema created/verified successfully");
+    Ok(())
+}
+
+/// Runs database migrations to update existing databases with new columns
+fn run_migrations(conn: &Connection) -> Result<(), DatabaseError> {
+    // Migration: Add adventurer_type column to users table if it doesn't exist
+    let has_adventurer_type: bool = conn
+        .query_row(
+            "SELECT COUNT(*) > 0 FROM pragma_table_info('users') WHERE name = 'adventurer_type'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
+    
+    if !has_adventurer_type {
+        log::info!("Running migration: Adding adventurer_type column to users table");
+        conn.execute(
+            "ALTER TABLE users ADD COLUMN adventurer_type TEXT DEFAULT 'explorer'",
+            [],
+        )
+        .map_err(|e| DatabaseError::InitializationError(format!("Migration failed: {}", e)))?;
+    }
+    
     Ok(())
 }
 
